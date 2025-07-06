@@ -53,3 +53,16 @@ void disaplay(){
 }
 // something anothers ...
 ```
+
+## code format
+C++ format vscode setting file:
+```json
+"C_Cpp.vcFormat.newLine.beforeElse": false,
+"C_Cpp.vcFormat.newLine.beforeCatch": false,
+"C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "sameLine",
+"C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "sameLine",
+"C_Cpp.vcFormat.newLine.beforeOpenBrace.lambda": "sameLine",
+"C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": "newLine",
+"C_Cpp.vcFormat.newLine.beforeOpenBrace.type": "sameLine",
+"C_Cpp.formatting": "vcFormat"
+```

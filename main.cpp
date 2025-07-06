@@ -5,9 +5,9 @@
  * @details This is a soft rasterizer that implements the basic rendering pipeline.
  * @version 0.1
  * @date 2025-07-05
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #include <iostream>
 #include <algorithm>
@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 
 /**
  * @brief Initialize OpenGL
- * 
+ *
  * @param argc Number of program arguments
  * @param argv Program argument array
  */
@@ -47,9 +47,9 @@ void initializeOpenGL(int argc, char** argv) {
 }
 /**
  * @brief Call back for window resize
- * 
- * @param width 
- * @param height 
+ *
+ * @param width
+ * @param height
  */
 void ResizeWindow(int width, int height) {
     glViewport(0, 0, width, height);
@@ -60,7 +60,7 @@ void ResizeWindow(int width, int height) {
 
 /**
  * @brief rendering loop
- * 
+ *
  */
 void Display() {
     glClear(GL_COLOR_BUFFER_BIT);

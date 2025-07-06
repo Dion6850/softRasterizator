@@ -18,8 +18,7 @@ namespace test1
      *
      * @return Eigen::Vector3d
      */
-    Eigen::Vector3d task1()
-    {
+    Eigen::Vector3d task1() {
         Eigen::Vector3d P(2, 1, 1);
         float theta = 0;
         Eigen::Matrix3d mat;

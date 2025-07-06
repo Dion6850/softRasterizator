@@ -4,17 +4,17 @@
  * @brief finished task2 of GAMES101
  * @version 0.1
  * @date 2025-07-06
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #pragma once
 #include <util.h>
 namespace test2
 {
-    Eigen::Matrix4d get_view_matrix(const Eigen::Vector3d &eye,
-                                const Eigen::Vector3d &center,
-                                const Eigen::Vector3d &up) {
+    Eigen::Matrix4d get_view_matrix(const Eigen::Vector3d& eye,
+        const Eigen::Vector3d& center,
+        const Eigen::Vector3d& up) {
         Eigen::Vector3d z = (eye - center).normalized();      // forward
         Eigen::Vector3d x = up.cross(z).normalized();         // right
         Eigen::Vector3d y = z.cross(x);                       // up
@@ -33,8 +33,7 @@ namespace test2
 
         return view;
     }
-    void task()
-    {
+    void task() {
         // 三角形
         Eigen::Vector4d v0(2, 0, -2, 1);
         Eigen::Vector4d v1(0, 2, -4, 1);
@@ -75,7 +74,7 @@ namespace test2
         Eigen::Matrix4d mperspective;
         mperspective << z_near, 0, 0, 0,
             0, z_near, 0, 0,
-            0, 0, z_near + z_far, z_near * z_far,
+            0, 0, z_near + z_far, z_near* z_far,
             0, 0, -1, 0;
         // 正交投影矩阵
         Eigen::Matrix4d morth;
@@ -115,24 +114,21 @@ namespace test2
 
         // 包围盒
         int min_x = std::min(std::min(static_cast<int>(v0_screen.x()), static_cast<int>(v1_screen.x())),
-                             static_cast<int>(v2_screen.x()));
+            static_cast<int>(v2_screen.x()));
         int max_x = std::max(std::max(static_cast<int>(v0_screen.x()), static_cast<int>(v1_screen.x())),
-                             static_cast<int>(v2_screen.x()));
+            static_cast<int>(v2_screen.x()));
         int min_y = std::min(std::min(static_cast<int>(v0_screen.y()), static_cast<int>(v1_screen.y())),
-                             static_cast<int>(v2_screen.y()));
+            static_cast<int>(v2_screen.y()));
         int max_y = std::max(std::max(static_cast<int>(v0_screen.y()), static_cast<int>(v1_screen.y())),
-                             static_cast<int>(v2_screen.y()));
-        for (int i = min_y; i <= max_y; i++)
-        {
-            for (int j = min_x; j <= max_x; j++)
-            {
+            static_cast<int>(v2_screen.y()));
+        for (int i = min_y; i <= max_y; i++) {
+            for (int j = min_x; j <= max_x; j++) {
                 Eigen::Vector2i pixel(j, i);
                 Eigen::Vector2i v0_pixel(static_cast<int>(v0_screen.x()), static_cast<int>(v0_screen.y()));
                 Eigen::Vector2i v1_pixel(static_cast<int>(v1_screen.x()), static_cast<int>(v1_screen.y()));
                 Eigen::Vector2i v2_pixel(static_cast<int>(v2_screen.x()), static_cast<int>(v2_screen.y()));
                 if (cross(pixel - v1_pixel, v0_pixel - v1_pixel) < 0 && cross(pixel - v0_pixel, v2_pixel - v0_pixel) < 0 &&
-                    cross(pixel - v2_pixel, v1_pixel - v2_pixel) < 0)
-                {
+                    cross(pixel - v2_pixel, v1_pixel - v2_pixel) < 0) {
                     SetPixel(j + screen_width / 2, i + screen_length / 2, Eigen::Vector3d(255, 0, 0));
                 };
             }

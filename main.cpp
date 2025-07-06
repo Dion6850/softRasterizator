@@ -5,7 +5,39 @@
 #include <iostream>
 #include <algorithm>
 #include "Eigen/Dense"
-#include <opencv2/opencv.hpp>
+#include <GL/freeglut.h>
+
+/**
+ * @brief 设置像素点颜色
+ * @param x x坐标
+ * @param y y坐标
+ * @param color 颜色向量(255,255,255)
+ */
+inline void SetPixel(const int& x, const int&y, const Eigen::Vector3d& color) {
+    glBegin(GL_POINTS);
+    glColor3f(color.x(), color.y(), color.z());
+    glVertex2i(x, y);
+    glEnd();
+}
+
+void initializeOpenGL(int argc = 0, char** argv = nullptr) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(512, 512);
+    glutCreateWindow("Soft Resterizator");
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-256, 256, -256, 256, -1, 1);
+}
+void ResizeWindow(int width, int height) {
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-256, 256, -256, 256, -1, 1);
+}
+
 
 Eigen::Vector3d task1() {
     Eigen::Vector3d P(2, 1, 1);
@@ -123,18 +155,18 @@ void task2() {
     std::cout << v2_screen.x() << " " << v2_screen.y() << " " << v2_standard.z() << std::endl;
 
     // 创建画布
-    cv::Mat canvas = cv::Mat::zeros(512, 512, CV_8UC3);
+    // cv::Mat canvas = cv::Mat::zeros(512, 512, CV_8UC3);
 
-    cv::Point pt0(static_cast<int>(v0_screen.x()) + screen_width / 2,
-                  static_cast<int>(v0_screen.y()) + screen_length / 2);
-    cv::Point pt1(static_cast<int>(v1_screen.x()) + screen_width / 2,
-                  static_cast<int>(v1_screen.y()) + screen_length / 2);
-    cv::Point pt2(static_cast<int>(v2_screen.x()) + screen_width / 2,
-                  static_cast<int>(v2_screen.y()) + screen_length / 2);
+    // cv::Point pt0(static_cast<int>(v0_screen.x()) + screen_width / 2,
+    //               static_cast<int>(v0_screen.y()) + screen_length / 2);
+    // cv::Point pt1(static_cast<int>(v1_screen.x()) + screen_width / 2,
+    //               static_cast<int>(v1_screen.y()) + screen_length / 2);
+    // cv::Point pt2(static_cast<int>(v2_screen.x()) + screen_width / 2,
+    //               static_cast<int>(v2_screen.y()) + screen_length / 2);
 
-    cv::line(canvas, pt0, pt1, cv::Scalar(0, 255, 0), 2);
-    cv::line(canvas, pt1, pt2, cv::Scalar(0, 255, 0), 2);
-    cv::line(canvas, pt2, pt0, cv::Scalar(0, 255, 0), 2);
+    // cv::line(canvas, pt0, pt1, cv::Scalar(0, 255, 0), 2);
+    // cv::line(canvas, pt1, pt2, cv::Scalar(0, 255, 0), 2);
+    // cv::line(canvas, pt2, pt0, cv::Scalar(0, 255, 0), 2);
 
     // MSAA
 
@@ -155,17 +187,29 @@ void task2() {
             Eigen::Vector2i v2_pixel(static_cast<int>(v2_screen.x()), static_cast<int>(v2_screen.y()));
             if (cross(pixel - v1_pixel, v0_pixel - v1_pixel) < 0 && cross(pixel - v0_pixel, v2_pixel - v0_pixel) < 0 &&
                 cross(pixel - v2_pixel, v1_pixel - v2_pixel) < 0) {
-                canvas.at<cv::Vec3b>(i + screen_length/2,j+screen_width/2) = cv::Vec3b (0, 0, 255);
+                SetPixel(j, i, Eigen::Vector3d(255, 0, 0));
+                // canvas.at<cv::Vec3b>(i + screen_length/2,j+screen_width/2) = cv::Vec3b (0, 0, 255);
             };
         }
     }
 
-    cv::imwrite("output.png", canvas);
+    // cv::imwrite("output.png", canvas);
 }
 
-int main() {
-    std::cout << "OpenCV version: " << CV_VERSION << std::endl;
-//    std::cout << task1().head<2>() << std::endl;
+void Display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    // 任务1
+    // Eigen::Vector3d res = task1();
+    // SetPixel(res.x(), res.y(), Eigen::Vector3d(1, 0, 0));
+    // 任务2
     task2();
+    glFlush();
+}
+int main(int argc, char** argv) {
+    // 初始化OpenGL
+    initializeOpenGL(argc, argv);
+    glutReshapeFunc(ResizeWindow);
+    glutDisplayFunc(Display);
+    glutMainLoop();
     return 0;
 }

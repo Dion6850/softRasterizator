@@ -1,7 +1,8 @@
 /**
  * @file main.cpp
  * @author dion (you@domain.com) zhywyt (zhywyt@yeah.net)
- * @brief 
+ * @brief Resterizator
+ * @details This is a soft rasterizer that implements the basic rendering pipeline.
  * @version 0.1
  * @date 2025-07-05
  * 
@@ -14,24 +15,23 @@
 #include <GL/freeglut.h>
 
 /**
- * @brief 设置像素点颜色
- * @param x x坐标
- * @param y y坐标
- * @param color 颜色向量(255,255,255)
- * @details 坐标系以屏幕左上角为原点，向右为x，向下为y
+ * @brief Set Pixel Color
+ * @param x x coordinate
+ * @param y y coordinate
+ * @param color color vector (255,255,255)
+ * @details The coordinate system takes the top-left corner of the screen as the origin, with x going right and y going down.
+ * @warning Must be wrapped in glBegin(GL_POINTS) and glEnd().
  */
 inline void SetPixel(const int& x, const int&y, const Eigen::Vector3d& color) {
-    glBegin(GL_POINTS);
     glColor3f(color.x(), color.y(), color.z());
     glVertex2i(x, y);
-    glEnd();
 }
 
 /**
- * @brief 初始化gl
+ * @brief Initialize OpenGL
  * 
- * @param argc 程序参数数量
- * @param argv 程序参数数组
+ * @param argc Number of program arguments
+ * @param argv Program argument array
  */
 void initializeOpenGL(int argc = 0, char** argv = nullptr) {
     glutInit(&argc, argv);
@@ -45,7 +45,7 @@ void initializeOpenGL(int argc = 0, char** argv = nullptr) {
     glOrtho(0, 512, 512, 0, -1, 1);
 }
 /**
- * @brief 窗口变换回调函数
+ * @brief Call back for window resize
  * 
  * @param width 
  * @param height 
@@ -198,9 +198,23 @@ void task2() {
     }
 }
 
+/**
+ * @brief rendering loop
+ * 
+ */
 void Display() {
     glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_POINTS);
+    /*
+    ################## just can draw points ##################
+    */
+
     task2();
+
+    /*
+    ################## just can draw points ##################
+    */
+    glEnd();
     glFlush();
 }
 int main(int argc, char** argv) {

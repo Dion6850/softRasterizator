@@ -1,7 +1,13 @@
-//
-// Created by dion on 25-7-5.
-//
-
+/**
+ * @file main.cpp
+ * @author dion (you@domain.com) zhywyt (zhywyt@yeah.net)
+ * @brief 
+ * @version 0.1
+ * @date 2025-07-05
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <iostream>
 #include <algorithm>
 #include "Eigen/Dense"
@@ -12,6 +18,7 @@
  * @param x x坐标
  * @param y y坐标
  * @param color 颜色向量(255,255,255)
+ * @details 坐标系以屏幕左上角为原点，向右为x，向下为y
  */
 inline void SetPixel(const int& x, const int&y, const Eigen::Vector3d& color) {
     glBegin(GL_POINTS);
@@ -20,6 +27,12 @@ inline void SetPixel(const int& x, const int&y, const Eigen::Vector3d& color) {
     glEnd();
 }
 
+/**
+ * @brief 初始化gl
+ * 
+ * @param argc 程序参数数量
+ * @param argv 程序参数数组
+ */
 void initializeOpenGL(int argc = 0, char** argv = nullptr) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
@@ -29,13 +42,19 @@ void initializeOpenGL(int argc = 0, char** argv = nullptr) {
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-256, 256, -256, 256, -1, 1);
+    glOrtho(0, 512, 512, 0, -1, 1);
 }
+/**
+ * @brief 窗口变换回调函数
+ * 
+ * @param width 
+ * @param height 
+ */
 void ResizeWindow(int width, int height) {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-256, 256, -256, 256, -1, 1);
+    glOrtho(0, width, height, 0, -1, 1);
 }
 
 
@@ -154,20 +173,6 @@ void task2() {
     std::cout << v1_screen.x() << " " << v1_screen.y() << " " << v1_standard.z() << std::endl;
     std::cout << v2_screen.x() << " " << v2_screen.y() << " " << v2_standard.z() << std::endl;
 
-    // 创建画布
-    // cv::Mat canvas = cv::Mat::zeros(512, 512, CV_8UC3);
-
-    // cv::Point pt0(static_cast<int>(v0_screen.x()) + screen_width / 2,
-    //               static_cast<int>(v0_screen.y()) + screen_length / 2);
-    // cv::Point pt1(static_cast<int>(v1_screen.x()) + screen_width / 2,
-    //               static_cast<int>(v1_screen.y()) + screen_length / 2);
-    // cv::Point pt2(static_cast<int>(v2_screen.x()) + screen_width / 2,
-    //               static_cast<int>(v2_screen.y()) + screen_length / 2);
-
-    // cv::line(canvas, pt0, pt1, cv::Scalar(0, 255, 0), 2);
-    // cv::line(canvas, pt1, pt2, cv::Scalar(0, 255, 0), 2);
-    // cv::line(canvas, pt2, pt0, cv::Scalar(0, 255, 0), 2);
-
     // MSAA
 
     // 包围盒
@@ -187,21 +192,14 @@ void task2() {
             Eigen::Vector2i v2_pixel(static_cast<int>(v2_screen.x()), static_cast<int>(v2_screen.y()));
             if (cross(pixel - v1_pixel, v0_pixel - v1_pixel) < 0 && cross(pixel - v0_pixel, v2_pixel - v0_pixel) < 0 &&
                 cross(pixel - v2_pixel, v1_pixel - v2_pixel) < 0) {
-                SetPixel(j, i, Eigen::Vector3d(255, 0, 0));
-                // canvas.at<cv::Vec3b>(i + screen_length/2,j+screen_width/2) = cv::Vec3b (0, 0, 255);
+                SetPixel(j + screen_width/2, i + screen_length/2, Eigen::Vector3d(255, 0, 0));
             };
         }
     }
-
-    // cv::imwrite("output.png", canvas);
 }
 
 void Display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    // 任务1
-    // Eigen::Vector3d res = task1();
-    // SetPixel(res.x(), res.y(), Eigen::Vector3d(1, 0, 0));
-    // 任务2
     task2();
     glFlush();
 }

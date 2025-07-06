@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.28)
 project(cv)
 
 set(CMAKE_CXX_STANDARD 20)
-set(OpenCV_DIR "E:\\opencv\\mingw-build\\install")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 set(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)

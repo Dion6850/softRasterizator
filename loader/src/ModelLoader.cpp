@@ -26,7 +26,7 @@ bool ModelLoader::loadModel(const std::string& filename) {
             while (iss >> vert_str) {
                 size_t pos = vert_str.find('/');
                 int idx = std::stoi(pos == std::string::npos ? vert_str : vert_str.substr(0, pos));
-                face_indices.push_back(idx - 1); // OBJ索引从1开始
+                face_indices.push_back(idx - 1); // OBJ indices are 1-based, convert to 0-based
             }
             if (face_indices.size() >= 3) {
                 temp_faces.push_back(face_indices);
@@ -35,7 +35,6 @@ bool ModelLoader::loadModel(const std::string& filename) {
     }
     file.close();
     vertices = temp_vertices;
-    // 组装三角形
     for (const auto& face : temp_faces) {
         for (size_t i = 1; i + 1 < face.size(); ++i) {
             triangles.push_back({

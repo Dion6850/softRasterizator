@@ -23,9 +23,6 @@
 #elif defined(__APPLE__)
 #include <mach/mach.h>
 #endif
-
-// 获取当前进程的内存使用（单位：KB）
-
 size_t getMemoryUsageKB() {
 #if defined(_WIN32)
     PROCESS_MEMORY_COUNTERS pmc;
@@ -59,17 +56,14 @@ size_t getMemoryUsageKB() {
 int main(int argc, char* argv[]) {
     ModelLoader loader;
     std::cout << "[内存监控] 启动时内存: " << getMemoryUsageKB() << " KB" << std::endl;
-    // 测试用例：尝试加载一个不存在的模型文件
     bool result = loader.loadModel("nonexistent.obj");
     std::cout << "加载不存在文件: " << (result ? "成功" : "失败") << std::endl;
     std::cout << "[内存监控] 加载不存在文件后内存: " << getMemoryUsageKB() << " KB" << std::endl;
 
-    // 检查是否有 --files 参数
     std::vector<std::string> files;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "--files" && i + 1 < argc) {
-            // 收集后续所有文件名直到下一个以--开头的参数或结尾
             for (int j = i + 1; j < argc && std::string(argv[j]).rfind("--", 0) != 0; ++j) {
                 files.push_back(argv[j]);
                 i = j;
@@ -86,7 +80,6 @@ int main(int argc, char* argv[]) {
         if (result) {
             std::cout << "顶点数: " << loader.getVertices().size() << std::endl;
             std::cout << "三角形数: " << loader.getTriangles().size() << std::endl;
-            // 打印部分顶点和三角形信息
             if (!loader.getVertices().empty()) {
                 const auto& v = loader.getVertices()[0];
                 std::cout << "第一个顶点: (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;

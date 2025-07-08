@@ -1,3 +1,13 @@
+/**
+ * @file ModelLoader.h
+ * @author zhywyt (zhywyt@yeah.net)
+ * @brief 3D Model Loader
+ * @version 0.1
+ * @date 2025-07-08
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #pragma once
 #include <string>
 #include <vector>
@@ -16,13 +26,17 @@ public:
     ModelLoader() = default;
     ~ModelLoader() = default;
 
-    // 加载模型文件，返回是否成功
+    /**
+     * @brief load 3D model from file
+     *
+     * @param filename object file name
+     * @details This function can load only "v" and "f" lines from OBJ files.
+     * @return true if successful, false otherwise
+     */
     bool loadModel(const std::string& filename);
 
-    // 获取顶点数据
     const std::vector<Vertex>& getVertices() const;
 
-    // 获取三角形数据
     const std::vector<Triangle>& getTriangles() const;
 
 private:

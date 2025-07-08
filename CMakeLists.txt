@@ -19,3 +19,7 @@ if(MSVC)
 endif()
 
 include_directories(thirdPart/eigen-3.4.0)
+
+# 添加loder模块
+add_subdirectory(loader)
+target_link_libraries(${PROJECT_NAME} loader)

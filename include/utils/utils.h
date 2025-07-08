@@ -1,6 +1,7 @@
 #pragma once
 #include <GL/freeglut.h>
 #include <Eigen/Dense>
+#include <utils/MVP.h>
 /**
  * @brief Set Pixel Color
  * @param x x coordinate
@@ -17,7 +18,8 @@ inline void SetPixel(const int& x, const int& y, const Eigen::Vector3d& color) {
 inline int cross(Eigen::Vector2i a, Eigen::Vector2i b) {
     return a.x() * b.y() - a.y() * b.x();
 }
-namespace util
+
+namespace utils
 {
     // #include <cmath>
     /*

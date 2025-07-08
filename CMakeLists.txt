@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.20)
 project(softResterizator)
 
 set(CMAKE_CXX_STANDARD 20)
 include_directories(${CMAKE_SOURCE_DIR}/include)
-add_executable(${PROJECT_NAME} main.cpp)
+include_directories(${CMAKE_SOURCE_DIR}/src)
+file(GLOB_RECURSE SOURCE_FILES src/utils/*.cpp
+        src/core/*.cpp)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} main.cpp)
 find_package(GLUT REQUIRED)
 if(GLUT_FOUND)
     include_directories(${GLUT_INCLUDE_DIR})

@@ -9,12 +9,9 @@
  * @copyright Copyright (c) 2025
  *
  */
-#include <iostream>
-#include <algorithm>
-#include <Eigen/Dense>
 #include <GL/freeglut.h>
-#include <util.h>
 #include <test/test2.h>
+
 
 void initializeOpenGL(int argc = 0, char** argv = nullptr);
 void ResizeWindow(int width, int height);

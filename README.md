@@ -19,7 +19,7 @@ cmake .. -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cm
 |   |-- test
 |   |   |-- test1.h
 |   |   `-- test2.h
-|   `-- util.h
+|   `-- utils.h
 |-- main.cpp
 |-- thirdPart
 |   `-- eigen-3.4.0
@@ -32,7 +32,7 @@ cmake .. -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cm
 In your test file at `include/test/your_test_name.h`:
 ```cpp
 #pragma once
-#include <util.h>
+#include <utils.h>
 namespace your_test_name{
     void task(){
         // ... TODO ...

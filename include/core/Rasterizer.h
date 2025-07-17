@@ -19,7 +19,6 @@ namespace Rasterizer {
 
 class Rasterizer {
 public:
-  static
 };
 
 } // Rasterizer

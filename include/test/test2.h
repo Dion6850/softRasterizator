@@ -12,8 +12,6 @@
 #include <iostream>
 #include <utils/utils.h>
 
-namespace test2
-{
     Eigen::Matrix4d get_view_matrix(const Eigen::Vector3d& eye,
                                     const Eigen::Vector3d& center,
                                     const Eigen::Vector3d& up)
@@ -147,4 +145,23 @@ namespace test2
             }
         }
     }
+
+/**
+ * @brief rendering loop
+ *
+ */
+inline void Display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_POINTS);
+    /*
+    ################## just can draw points ##################
+    */
+
+    task();
+
+    /*
+    ################## just can draw points ##################
+    */
+    glEnd();
+    glFlush();
 }

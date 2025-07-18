@@ -9,9 +9,7 @@
  *
  */
 #pragma once
-#include <util.h>
-namespace test1
-{
+#include <utils/utils.h>
 
     /**
      * @brief set rotation matrix
@@ -28,4 +26,22 @@ namespace test1
         Eigen::Vector3d res = mat * P;
         return res;
     }
+/**
+ * @brief rendering loop
+ *
+ */
+inline void Display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_POINTS);
+    /*
+    ################## just can draw points ##################
+    */
+
+    task1();
+
+    /*
+    ################## just can draw points ##################
+    */
+    glEnd();
+    glFlush();
 }

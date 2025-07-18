@@ -54,23 +54,3 @@ void ResizeWindow(int width, int height) {
     glLoadIdentity();
     glOrtho(0, width, height, 0, -1, 1);
 }
-
-/**
- * @brief rendering loop
- *
- */
-void Display() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBegin(GL_POINTS);
-    /*
-    ################## just can draw points ##################
-    */
-
-    test2::task();
-
-    /*
-    ################## just can draw points ##################
-    */
-    glEnd();
-    glFlush();
-}

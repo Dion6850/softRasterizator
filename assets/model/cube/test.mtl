@@ -1,0 +1,21 @@
+# Material library for test.obj
+
+newmtl red_material
+Ka 0.2 0.0 0.0
+Kd 0.8 0.0 0.0
+Ks 1.0 1.0 1.0
+Ns 100.0
+map_Kd red.jpg
+
+newmtl blue_material
+Ka 0.0 0.0 0.2
+Kd 0.0 0.0 0.8
+Ks 1.0 1.0 1.0
+Ns 50.0
+map_Kd blue.jpg
+
+newmtl green_material
+Ka 0.0 0.2 0.0
+Kd 0.0 0.8 0.0
+Ks 0.5 0.5 0.5
+Ns 75.0

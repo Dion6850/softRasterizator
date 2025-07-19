@@ -12,106 +12,8 @@
 #include <string>
 #include <vector>
 #include <map>
-
-/**
- * @brief Represents a 3D vertex position
- */
-struct Vertex {
-    float x, y, z;
-};
-
-/**
- * @brief Represents a 2D texture coordinate
- */
-struct TextureCoord {
-    float u, v;
-};
-
-/**
- * @brief Represents a 3D vertex normal
- */
-struct Normal {
-    float x, y, z;
-};
-
-/**
- * @brief Material information from MTL files
- */
-struct Material {
-    std::string name;                     ///< Material name
-    float ambient[3] = {0.2f, 0.2f, 0.2f};    ///< Ambient color (Ka)
-    float diffuse[3] = {0.8f, 0.8f, 0.8f};    ///< Diffuse color (Kd)
-    float specular[3] = {0.0f, 0.0f, 0.0f};   ///< Specular color (Ks)
-    float shininess = 0.0f;               ///< Specular exponent (Ns)
-    std::string diffuseTexture;           ///< Diffuse texture map (map_Kd)
-    
-    /**
-     * @brief Check if this material has a diffuse texture
-     * @return true if diffuse texture filename is not empty
-     */
-    bool hasDiffuseTexture() const {
-        return !diffuseTexture.empty();
-    }
-    
-    /**
-     * @brief Get the full texture path (can be used with base path)
-     * @param basePath Base directory path
-     * @return Full path to the texture file
-     */
-    std::string getFullTexturePath(const std::string& basePath) const {
-        if (diffuseTexture.empty()) {
-            return "";
-        }
-        if (basePath.empty()) {
-            return diffuseTexture;
-        }
-        return basePath + "/" + diffuseTexture;
-    }
-};
-
-/**
- * @brief Represents a triangle with vertex, texture, and normal indices
- * @details Each triangle stores indices into the respective arrays for maximum flexibility
- */
-struct Triangle {
-    Vertex v0, v1, v2;                    ///< Vertex positions
-    TextureCoord t0, t1, t2;             ///< Texture coordinates (if available)
-    Normal n0, n1, n2;                   ///< Vertex normals (if available)
-    bool hasTextures;                     ///< Whether texture coordinates are available
-    bool hasNormals;                      ///< Whether vertex normals are available
-    std::string materialName;             ///< Name of the material used by this triangle
-    const Material* material;             ///< Pointer to the material (set after materials are loaded)
-    
-    /**
-     * @brief Constructor
-     */
-    Triangle() : hasTextures(false), hasNormals(false), material(nullptr) {}
-    
-    /**
-     * @brief Check if this triangle has a valid material assigned
-     * @return true if material is not null
-     */
-    bool hasMaterial() const {
-        return material != nullptr;
-    }
-    
-    /**
-     * @brief Check if this triangle has a diffuse texture
-     * @return true if material exists and has a diffuse texture
-     */
-    bool hasDiffuseTexture() const {
-        return material != nullptr && !material->diffuseTexture.empty();
-    }
-    
-    /**
-     * @brief Get the diffuse texture filename
-     * @return Empty string if no texture, otherwise the texture filename
-     */
-    const std::string& getDiffuseTexture() const {
-        static const std::string empty;
-        return (material != nullptr) ? material->diffuseTexture : empty;
-    }
-};
+#include <Lsr3D/core/resource.h>
+using namespace lsr3d;
 
 /**
  * @brief Enhanced 3D Model Loader supporting standard OBJ file features
@@ -160,25 +62,32 @@ public:
      * @brief Get all vertex positions
      * @return Constant reference to the vector of vertices
      */
-    const std::vector<Vertex>& getVertices() const;
+    const std::unordered_map<VertexHandle, Vertex>& getVertices() const;
 
     /**
      * @brief Get all triangles
      * @return Constant reference to the vector of triangles
      */
-    const std::vector<Triangle>& getTriangles() const;
+    const std::unordered_map<TriangleHandle, Triangle>& getTriangles() const;
 
     /**
      * @brief Get all texture coordinates
      * @return Constant reference to the vector of texture coordinates
      */
-    const std::vector<TextureCoord>& getTextureCoords() const;
+    const std::unordered_map<TextureCoordHandle, TextureCoord>& getTextureCoords() const;
 
     /**
      * @brief Get all vertex normals
      * @return Constant reference to the vector of vertex normals
      */
-    const std::vector<Normal>& getNormals() const;
+    const std::unordered_map<NormalHandle, Normal>& getNormals() const;
+
+    /**
+     * @brief Get the Images object
+     *
+     * @return const std::unordered_map<ImageHandle, Image>& 
+     */
+    const std::unordered_map<ImageHandle, Image>& getImages() const;
 
     /**
      * @brief Get all materials
@@ -210,16 +119,34 @@ public:
                       size_t& textureCount, size_t& normalCount, 
                       size_t& materialCount) const;
 
+    void printStatistics(std::ostream& os) const {
+        size_t vertexCount, triangleCount, textureCount, normalCount, materialCount;
+        getStatistics(vertexCount, triangleCount, textureCount, normalCount, materialCount);
+        os << "Model Statistics:\n"
+           << "Vertices: " << vertexCount << "\n"
+           << "Triangles: " << triangleCount << "\n"
+           << "Texture Coordinates: " << textureCount << "\n"
+           << "Normals: " << normalCount << "\n"
+           << "Materials: " << materialCount << "\n";
+    }
+
 private:
-    std::vector<Vertex> vertices;              ///< Vertex positions
-    std::vector<TextureCoord> textureCoords;   ///< Texture coordinates
-    std::vector<Normal> normals;               ///< Vertex normals
-    std::vector<Triangle> triangles;           ///< Triangulated faces
+    std::unordered_map<lsr3d::VertexHandle, Vertex> vertices; ///< Vertex positions
+    std::unordered_map<lsr3d::TextureCoordHandle, TextureCoord> textureCoords; ///< Texture coordinates
+    std::unordered_map<lsr3d::NormalHandle, Normal> normals; ///< Vertex normals
+    std::unordered_map<lsr3d::TriangleHandle, Triangle> triangles; ///< Triangulated faces
+    std::unordered_map<lsr3d::ImageHandle, lsr3d::Image> images; ///< Image resources
     std::map<std::string, Material> materials; ///< Materials by name
+
     std::string currentObjectName;             ///< Current object name
     std::string currentMaterial;               ///< Current material name
     std::string basePath;                      ///< Base path for resolving relative file paths
 
+    int currentVertexIndex = 0; ///< Current vertex index for generating handles
+    int currentTextureIndex = 0; ///< Current texture coordinate index for generating handles
+    int currentNormalIndex = 0; ///< Current normal index for generating handles
+    int currentTriangleIndex = 0; ///< Current triangle index for generating handles
+    int currentImageIndex = 0; ///< Current image index for generating handles
     /**
      * @brief Parse a single line from the OBJ file
      * @param line The line to parse

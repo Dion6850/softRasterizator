@@ -30,9 +30,9 @@ namespace utils
          * @param up 上方向
          * @return 相机视角变换矩阵
          */
-        static Eigen::Matrix4d cal_view_matrix(const Eigen::Vector3d& eye,
-                                               const Eigen::Vector3d& center,
-                                               const Eigen::Vector3d& up);
+        static Eigen::Matrix4f cal_view_matrix(const Eigen::Vector3f& eye,
+                                               const Eigen::Vector3f& center,
+                                               const Eigen::Vector3f& up);
 
         /**
          * @brief 计算模型变换矩阵
@@ -41,9 +41,9 @@ namespace utils
          * @param scale 缩放向量
          * @return 模型变换矩阵
          */
-        static Eigen::Matrix4d cal_model_matrix(const Eigen::Vector3d& translation,
-                                                const Eigen::Vector3d& rotation,
-                                                const Eigen::Vector3d& scale);
+        static Eigen::Matrix4f cal_model_matrix(const Eigen::Vector3f& translation,
+                                                const Eigen::Vector3f& rotation,
+                                                const Eigen::Vector3f& scale);
         /**
          * @brief 计算相机视角的正交变换矩阵
          * @param fov 视场角（高）
@@ -52,10 +52,10 @@ namespace utils
          * @param far 原平面离相机的距离
          * @return 正交变换矩阵
          */
-        static Eigen::Matrix4d cal_projection_matrix(const double& fov,
-                                                     const double& aspect,
-                                                     const double& near,
-                                                     const double& far);
+        static Eigen::Matrix4f cal_projection_matrix(const float& fov,
+                                                     const float& aspect,
+                                                     const float& near,
+                                                     const float& far);
     };
 }
 

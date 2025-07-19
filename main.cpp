@@ -9,12 +9,9 @@
  * @copyright Copyright (c) 2025
  *
  */
-#include <iostream>
-#include <algorithm>
-#include <Eigen/Dense>
 #include <GL/freeglut.h>
-#include <util.h>
 #include <test/test2.h>
+
 
 void initializeOpenGL(int argc = 0, char** argv = nullptr);
 void ResizeWindow(int width, int height);
@@ -56,24 +53,4 @@ void ResizeWindow(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, height, 0, -1, 1);
-}
-
-/**
- * @brief rendering loop
- *
- */
-void Display() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBegin(GL_POINTS);
-    /*
-    ################## just can draw points ##################
-    */
-
-    test2::task();
-
-    /*
-    ################## just can draw points ##################
-    */
-    glEnd();
-    glFlush();
 }

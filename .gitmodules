@@ -1,0 +1,3 @@
+[submodule "thirdPart/stb"]
+	path = thirdPart/stb
+	url = https://github.com/nothings/stb.git

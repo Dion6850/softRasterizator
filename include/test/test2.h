@@ -9,15 +9,16 @@
  *
  */
 #pragma once
-#include <util.h>
-namespace test2
-{
+#include <iostream>
+#include <utils/utils.h>
+
     Eigen::Matrix4d get_view_matrix(const Eigen::Vector3d& eye,
-        const Eigen::Vector3d& center,
-        const Eigen::Vector3d& up) {
-        Eigen::Vector3d z = (eye - center).normalized();      // forward
-        Eigen::Vector3d x = up.cross(z).normalized();         // right
-        Eigen::Vector3d y = z.cross(x);                       // up
+                                    const Eigen::Vector3d& center,
+                                    const Eigen::Vector3d& up)
+    {
+        Eigen::Vector3d z = (eye - center).normalized(); // forward
+        Eigen::Vector3d x = up.cross(z).normalized(); // right
+        Eigen::Vector3d y = z.cross(x); // up
 
         Eigen::Matrix4d view = Eigen::Matrix4d::Identity();
 
@@ -33,7 +34,9 @@ namespace test2
 
         return view;
     }
-    void task() {
+
+    void task()
+    {
         // 三角形
         Eigen::Vector4d v0(2, 0, -2, 1);
         Eigen::Vector4d v1(0, 2, -4, 1);
@@ -50,9 +53,9 @@ namespace test2
         v2 = rotate * v2;
 
         // 相机坐标
-        Eigen::Vector3d eye(0, 2, 2);    // 相机位置
+        Eigen::Vector3d eye(0, 2, 2); // 相机位置
         Eigen::Vector3d center(0, 0, 0); // 相机看向目标
-        Eigen::Vector3d up(0, 1, 0);     // 上方向
+        Eigen::Vector3d up(0, 1, 0); // 上方向
 
         Eigen::Matrix4d view = get_view_matrix(eye, center, up);
         v0 = view * v0;
@@ -60,13 +63,13 @@ namespace test2
         v2 = view * v2;
 
         // 视角宽度（弧度度）
-        double eye_fov = 100.0 / 180 * 3.14159;
+        double eye_fov = 100.0;
         // 宽高比
         double aspect_ratio = 1;
         // 认为相机朝-z方向看（右手系）但是z_near,z_far定义为离相机的距离
         double z_near = 2;
         double z_far = 4;
-        double half_height = tan(eye_fov / 2) * z_near;
+        double half_height = tan(eye_fov  / 180 * M_PI / 2) * z_near;
         double half_width = half_height * aspect_ratio;
 
         // 映射到标准裁剪空间
@@ -74,7 +77,7 @@ namespace test2
         Eigen::Matrix4d mperspective;
         mperspective << z_near, 0, 0, 0,
             0, z_near, 0, 0,
-            0, 0, z_near + z_far, z_near* z_far,
+            0, 0, z_near + z_far, z_near * z_far,
             0, 0, -1, 0;
         // 正交投影矩阵
         Eigen::Matrix4d morth;
@@ -82,9 +85,13 @@ namespace test2
             0, 1 / half_height, 0, 0,
             0, 0, 2 / (z_far - z_near), (z_far + z_near) / (z_far - z_near),
             0, 0, 0, 1;
-        Eigen::Vector4d v0_standard = morth * mperspective * v0;
-        Eigen::Vector4d v1_standard = morth * mperspective * v1;
-        Eigen::Vector4d v2_standard = morth * mperspective * v2;
+        Eigen::Matrix4d morth_func = utils::MVP::cal_projection_matrix(eye_fov, aspect_ratio, z_near, z_far);
+        // Eigen::Vector4d v0_standard = morth * mperspective * v0;
+        // Eigen::Vector4d v1_standard = morth * mperspective * v1;
+        // Eigen::Vector4d v2_standard = morth * mperspective * v2;
+        Eigen::Vector4d v0_standard = morth_func * v0;
+        Eigen::Vector4d v1_standard = morth_func * v1;
+        Eigen::Vector4d v2_standard = morth_func * v2;
         // 透视除法
         v0_standard /= v0_standard.w();
         v1_standard /= v1_standard.w();
@@ -114,24 +121,47 @@ namespace test2
 
         // 包围盒
         int min_x = std::min(std::min(static_cast<int>(v0_screen.x()), static_cast<int>(v1_screen.x())),
-            static_cast<int>(v2_screen.x()));
+                             static_cast<int>(v2_screen.x()));
         int max_x = std::max(std::max(static_cast<int>(v0_screen.x()), static_cast<int>(v1_screen.x())),
-            static_cast<int>(v2_screen.x()));
+                             static_cast<int>(v2_screen.x()));
         int min_y = std::min(std::min(static_cast<int>(v0_screen.y()), static_cast<int>(v1_screen.y())),
-            static_cast<int>(v2_screen.y()));
+                             static_cast<int>(v2_screen.y()));
         int max_y = std::max(std::max(static_cast<int>(v0_screen.y()), static_cast<int>(v1_screen.y())),
-            static_cast<int>(v2_screen.y()));
-        for (int i = min_y; i <= max_y; i++) {
-            for (int j = min_x; j <= max_x; j++) {
+                             static_cast<int>(v2_screen.y()));
+        for (int i = min_y; i <= max_y; i++)
+        {
+            for (int j = min_x; j <= max_x; j++)
+            {
                 Eigen::Vector2i pixel(j, i);
                 Eigen::Vector2i v0_pixel(static_cast<int>(v0_screen.x()), static_cast<int>(v0_screen.y()));
                 Eigen::Vector2i v1_pixel(static_cast<int>(v1_screen.x()), static_cast<int>(v1_screen.y()));
                 Eigen::Vector2i v2_pixel(static_cast<int>(v2_screen.x()), static_cast<int>(v2_screen.y()));
-                if (cross(pixel - v1_pixel, v0_pixel - v1_pixel) < 0 && cross(pixel - v0_pixel, v2_pixel - v0_pixel) < 0 &&
-                    cross(pixel - v2_pixel, v1_pixel - v2_pixel) < 0) {
+                if (cross(pixel - v1_pixel, v0_pixel - v1_pixel) < 0 && cross(pixel - v0_pixel, v2_pixel - v0_pixel) < 0
+                    &&
+                    cross(pixel - v2_pixel, v1_pixel - v2_pixel) < 0)
+                {
                     SetPixel(j + screen_width / 2, i + screen_length / 2, Eigen::Vector3d(255, 0, 0));
                 };
             }
         }
     }
+
+/**
+ * @brief rendering loop
+ *
+ */
+inline void Display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_POINTS);
+    /*
+    ################## just can draw points ##################
+    */
+
+    task();
+
+    /*
+    ################## just can draw points ##################
+    */
+    glEnd();
+    glFlush();
 }

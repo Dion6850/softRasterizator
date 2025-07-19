@@ -1,10 +1,14 @@
-# Soft-Resterizator（软光栅渲染器）
+# Light Soft-Resterizator（软光栅渲染器）
+
 This project uses simple functions of FreeGLUT to draw a single point on the canvas, while performing other calculations on the CPU. It is aimed at learning how to create a software rasterizer.
 
 [gitea project repo](https://git.zhywyt.me/Rendering/softResterizator.git)
 [github project repo](https://github.com/Dion6850/softRasterizator.git)
+
 ## Quick Start
+
 You should change the `<path to your vcpkg root>` to the real path.
+
 ```cmd
 git submodule init
 git submodule update
@@ -12,7 +16,9 @@ vcpkg install freeglut
 cmake -B build
 cmake --build build -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cmake
 ```
+
 Just like this:
+
 ```cmd
 cmake --build build -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
@@ -39,7 +45,9 @@ cmake --build build -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.c
 ```
 
 ## code format
+
 C++ format vscode setting file:
+
 ```json
 "C_Cpp.vcFormat.newLine.beforeElse": false,
 "C_Cpp.vcFormat.newLine.beforeCatch": false,

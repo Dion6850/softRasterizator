@@ -23,6 +23,9 @@ static int frameCount = 0;
 static float fps = 0.0f;
 static float frameTime = 0.0f;
 
+// 定义初始窗口大小
+const int initialWidth = 1024;
+const int initialHeight = 1024;
 
 void initializeOpenGL(int argc = 0, char** argv = nullptr);
 void ResizeWindow(int width, int height);
@@ -107,14 +110,14 @@ int main(int argc, char** argv) {
 void initializeOpenGL(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(512, 512);
+    glutInitWindowSize(initialWidth, initialHeight);
     glutCreateWindow("Soft Resterizator");
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, 512, 512, 0, -1, 1);
-    Init(512, 512);
+    glOrtho(0, initialWidth, initialHeight, 0, -1, 1);
+    Init(initialWidth, initialHeight);
 }
 /**
  * @brief Call back for window resize

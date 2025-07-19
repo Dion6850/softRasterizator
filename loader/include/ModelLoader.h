@@ -35,18 +35,6 @@ struct Normal {
 };
 
 /**
- * @brief Represents a triangle with vertex, texture, and normal indices
- * @details Each triangle stores indices into the respective arrays for maximum flexibility
- */
-struct Triangle {
-    Vertex v0, v1, v2;                    ///< Vertex positions
-    TextureCoord t0, t1, t2;             ///< Texture coordinates (if available)
-    Normal n0, n1, n2;                   ///< Vertex normals (if available)
-    bool hasTextures;                     ///< Whether texture coordinates are available
-    bool hasNormals;                      ///< Whether vertex normals are available
-};
-
-/**
  * @brief Material information from MTL files
  */
 struct Material {
@@ -56,6 +44,73 @@ struct Material {
     float specular[3] = {0.0f, 0.0f, 0.0f};   ///< Specular color (Ks)
     float shininess = 0.0f;               ///< Specular exponent (Ns)
     std::string diffuseTexture;           ///< Diffuse texture map (map_Kd)
+    
+    /**
+     * @brief Check if this material has a diffuse texture
+     * @return true if diffuse texture filename is not empty
+     */
+    bool hasDiffuseTexture() const {
+        return !diffuseTexture.empty();
+    }
+    
+    /**
+     * @brief Get the full texture path (can be used with base path)
+     * @param basePath Base directory path
+     * @return Full path to the texture file
+     */
+    std::string getFullTexturePath(const std::string& basePath) const {
+        if (diffuseTexture.empty()) {
+            return "";
+        }
+        if (basePath.empty()) {
+            return diffuseTexture;
+        }
+        return basePath + "/" + diffuseTexture;
+    }
+};
+
+/**
+ * @brief Represents a triangle with vertex, texture, and normal indices
+ * @details Each triangle stores indices into the respective arrays for maximum flexibility
+ */
+struct Triangle {
+    Vertex v0, v1, v2;                    ///< Vertex positions
+    TextureCoord t0, t1, t2;             ///< Texture coordinates (if available)
+    Normal n0, n1, n2;                   ///< Vertex normals (if available)
+    bool hasTextures;                     ///< Whether texture coordinates are available
+    bool hasNormals;                      ///< Whether vertex normals are available
+    std::string materialName;             ///< Name of the material used by this triangle
+    const Material* material;             ///< Pointer to the material (set after materials are loaded)
+    
+    /**
+     * @brief Constructor
+     */
+    Triangle() : hasTextures(false), hasNormals(false), material(nullptr) {}
+    
+    /**
+     * @brief Check if this triangle has a valid material assigned
+     * @return true if material is not null
+     */
+    bool hasMaterial() const {
+        return material != nullptr;
+    }
+    
+    /**
+     * @brief Check if this triangle has a diffuse texture
+     * @return true if material exists and has a diffuse texture
+     */
+    bool hasDiffuseTexture() const {
+        return material != nullptr && !material->diffuseTexture.empty();
+    }
+    
+    /**
+     * @brief Get the diffuse texture filename
+     * @return Empty string if no texture, otherwise the texture filename
+     */
+    const std::string& getDiffuseTexture() const {
+        static const std::string empty;
+        return (material != nullptr) ? material->diffuseTexture : empty;
+    }
 };
 
 /**
@@ -138,6 +193,12 @@ public:
     const std::string& getCurrentObjectName() const;
 
     /**
+     * @brief Get the base path used for resolving relative file paths
+     * @return Base path string
+     */
+    const std::string& getBasePath() const;
+
+    /**
      * @brief Get loading statistics
      * @param vertexCount Output parameter for vertex count
      * @param triangleCount Output parameter for triangle count
@@ -157,6 +218,7 @@ private:
     std::map<std::string, Material> materials; ///< Materials by name
     std::string currentObjectName;             ///< Current object name
     std::string currentMaterial;               ///< Current material name
+    std::string basePath;                      ///< Base path for resolving relative file paths
 
     /**
      * @brief Parse a single line from the OBJ file
@@ -231,4 +293,27 @@ private:
      */
     bool parseFaceVertex(const std::string& vertexSpec, int& vertexIndex, 
                         int& textureIndex, int& normalIndex) const;
+
+    /**
+     * @brief Load materials from MTL file
+     * @param filename Path to the MTL file
+     * @param basePath Base path for resolving relative paths
+     * @return true if loading was successful
+     */
+    bool loadMaterialFile(const std::string& filename, const std::string& basePath);
+
+    /**
+     * @brief Parse a single line from MTL file
+     * @param line The line to parse
+     * @param currentMaterial Reference to current material being parsed
+     * @return true if parsing was successful
+     */
+    bool parseMaterialLine(const std::string& line, Material& currentMaterial);
+
+    /**
+     * @brief Update material pointers in all triangles after materials are loaded
+     * @details This function should be called after all materials are loaded to set
+     * the material pointers in triangles based on their material names
+     */
+    void updateTriangleMaterialPointers();
 };

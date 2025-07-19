@@ -3,12 +3,17 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 bool ModelLoader::loadModel(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         return false;
     }
+    
+    // Extract base path from the filename
+    std::filesystem::path filePath(filename);
+    basePath = filePath.parent_path().string();
     
     // Clear previous data
     vertices.clear();
@@ -27,6 +32,9 @@ bool ModelLoader::loadModel(const std::string& filename) {
         }
     }
     file.close();
+    
+    // Update material pointers in triangles after all materials are loaded
+    updateTriangleMaterialPointers();
     
     return !vertices.empty() && !triangles.empty();
 }
@@ -191,6 +199,9 @@ bool ModelLoader::parseFace(const std::vector<std::string>& tokens) {
             }
         }
         
+        // Set the current material name for this triangle
+        triangle.materialName = currentMaterial;
+        
         triangles.push_back(triangle);
     }
     
@@ -202,9 +213,10 @@ bool ModelLoader::parseMaterialLibrary(const std::vector<std::string>& tokens) {
         return false;
     }
     
-    // TODO: Implement MTL file loading
-    // For now, just acknowledge the material library reference
-    return true;
+    // Get the MTL filename
+    std::string mtlFilename = tokens[1];
+    
+    return loadMaterialFile(mtlFilename, basePath);
 }
 
 bool ModelLoader::parseUseMaterial(const std::vector<std::string>& tokens) {
@@ -307,6 +319,10 @@ const std::string& ModelLoader::getCurrentObjectName() const {
     return currentObjectName;
 }
 
+const std::string& ModelLoader::getBasePath() const {
+    return basePath;
+}
+
 void ModelLoader::getStatistics(size_t& vertexCount, size_t& triangleCount, 
                                size_t& textureCount, size_t& normalCount, 
                                size_t& materialCount) const {
@@ -315,4 +331,149 @@ void ModelLoader::getStatistics(size_t& vertexCount, size_t& triangleCount,
     textureCount = textureCoords.size();
     normalCount = normals.size();
     materialCount = materials.size();
+}
+
+bool ModelLoader::loadMaterialFile(const std::string& filename, const std::string& basePath) {
+    std::filesystem::path fullPath;
+    
+    if (basePath.empty()) {
+        fullPath = filename;
+    } else {
+        fullPath = std::filesystem::path(basePath) / filename;
+    }
+    
+    std::ifstream file(fullPath);
+    if (!file.is_open()) {
+        // Try alternative paths or report error
+        std::cerr << "Warning: Cannot open material file: " << fullPath << std::endl;
+        return false;
+    }
+    
+    Material currentMaterial;
+    std::string line;
+    
+    while (std::getline(file, line)) {
+        if (!parseMaterialLine(line, currentMaterial)) {
+            // Continue parsing even if individual lines fail
+        }
+    }
+    
+    // Add the last material if it has a name
+    if (!currentMaterial.name.empty()) {
+        materials[currentMaterial.name] = currentMaterial;
+    }
+    
+    file.close();
+    return true;
+}
+
+bool ModelLoader::parseMaterialLine(const std::string& line, Material& currentMaterial) {
+    // Skip empty lines and comments
+    if (line.empty() || line[0] == '#') {
+        return true;
+    }
+    
+    auto tokens = tokenize(line);
+    if (tokens.empty()) {
+        return true;
+    }
+    
+    const std::string& prefix = tokens[0];
+    
+    if (prefix == "newmtl") {
+        // Start new material
+        if (tokens.size() < 2) {
+            return false;
+        }
+        
+        // Save previous material if it exists
+        if (!currentMaterial.name.empty()) {
+            materials[currentMaterial.name] = currentMaterial;
+        }
+        
+        // Initialize new material
+        currentMaterial = Material();
+        currentMaterial.name = tokens[1];
+        return true;
+    }
+    
+    // Skip if no current material
+    if (currentMaterial.name.empty()) {
+        return true;
+    }
+    
+    if (prefix == "Ka") {
+        // Ambient color
+        if (tokens.size() >= 4) {
+            try {
+                currentMaterial.ambient[0] = std::stof(tokens[1]);
+                currentMaterial.ambient[1] = std::stof(tokens[2]);
+                currentMaterial.ambient[2] = std::stof(tokens[3]);
+                return true;
+            } catch (const std::exception&) {
+                return false;
+            }
+        }
+    } else if (prefix == "Kd") {
+        // Diffuse color
+        if (tokens.size() >= 4) {
+            try {
+                currentMaterial.diffuse[0] = std::stof(tokens[1]);
+                currentMaterial.diffuse[1] = std::stof(tokens[2]);
+                currentMaterial.diffuse[2] = std::stof(tokens[3]);
+                return true;
+            } catch (const std::exception&) {
+                return false;
+            }
+        }
+    } else if (prefix == "Ks") {
+        // Specular color
+        if (tokens.size() >= 4) {
+            try {
+                currentMaterial.specular[0] = std::stof(tokens[1]);
+                currentMaterial.specular[1] = std::stof(tokens[2]);
+                currentMaterial.specular[2] = std::stof(tokens[3]);
+                return true;
+            } catch (const std::exception&) {
+                return false;
+            }
+        }
+    } else if (prefix == "Ns") {
+        // Specular exponent (shininess)
+        if (tokens.size() >= 2) {
+            try {
+                currentMaterial.shininess = std::stof(tokens[1]);
+                return true;
+            } catch (const std::exception&) {
+                return false;
+            }
+        }
+    } else if (prefix == "map_Kd") {
+        // Diffuse texture map
+        if (tokens.size() >= 2) {
+            currentMaterial.diffuseTexture = tokens[1];
+            return true;
+        }
+    }
+    
+    // Unknown or unsupported line - ignore but don't fail
+    return true;
+}
+
+void ModelLoader::updateTriangleMaterialPointers() {
+    for (auto& triangle : triangles) {
+        if (!triangle.materialName.empty()) {
+            auto it = materials.find(triangle.materialName);
+            if (it != materials.end()) {
+                triangle.material = &(it->second);
+            } else {
+                // Material not found, set to nullptr
+                triangle.material = nullptr;
+                std::cerr << "Warning: Material '" << triangle.materialName << "' not found" << std::endl;
+            }
+        } else {
+            // No material assigned
+            triangle.material = nullptr;
+        }
+    }
 }

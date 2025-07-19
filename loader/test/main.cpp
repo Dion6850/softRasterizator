@@ -91,6 +91,7 @@ void printSampleData(const ModelLoader& loader) {
     const auto& triangles = loader.getTriangles();
     const auto& textureCoords = loader.getTextureCoords();
     const auto& normals = loader.getNormals();
+    const auto& materials = loader.getMaterials();
     
     std::cout << std::fixed << std::setprecision(6);
     
@@ -117,6 +118,20 @@ void printSampleData(const ModelLoader& loader) {
             std::cout << "第一个三角形法向量: (" << t.n0.x << ", " << t.n0.y << ", " << t.n0.z << ") - ("
                       << t.n1.x << ", " << t.n1.y << ", " << t.n1.z << ") - ("
                       << t.n2.x << ", " << t.n2.y << ", " << t.n2.z << ")" << std::endl;
+        }
+        
+        // Show material information for the first triangle
+        if (t.hasMaterial()) {
+            std::cout << "第一个三角形材质: " << t.materialName << std::endl;
+            std::cout << "  环境光: (" << t.material->ambient[0] << ", " << t.material->ambient[1] << ", " << t.material->ambient[2] << ")" << std::endl;
+            std::cout << "  漫反射: (" << t.material->diffuse[0] << ", " << t.material->diffuse[1] << ", " << t.material->diffuse[2] << ")" << std::endl;
+            std::cout << "  镜面反射: (" << t.material->specular[0] << ", " << t.material->specular[1] << ", " << t.material->specular[2] << ")" << std::endl;
+            std::cout << "  光泽度: " << t.material->shininess << std::endl;
+            if (t.hasDiffuseTexture()) {
+                std::cout << "  漫反射纹理: " << t.getDiffuseTexture() << std::endl;
+            }
+        } else if (!t.materialName.empty()) {
+            std::cout << "第一个三角形材质: " << t.materialName << " (未找到)" << std::endl;
         }
     }
     
@@ -163,6 +178,46 @@ bool testEnhancedFeatures(const std::string& filename) {
         std::cout << "✓ 基础顶点加载: " << (vCount > 0 ? "通过" : "失败") << std::endl;
         std::cout << "✓ 三角形生成: " << (tCount > 0 ? "通过" : "失败") << std::endl;
         std::cout << "✓ 纹理坐标支持: " << (texCount > 0 ? "通过" : "无纹理坐标") << std::endl;
+        std::cout << "✓ 法向量支持: " << (nCount > 0 ? "通过" : "无法向量") << std::endl;
+        std::cout << "✓ 材质支持: " << (mCount > 0 ? "通过" : "无材质") << std::endl;
+        
+        // Test material functionality
+        const auto& materials = loader.getMaterials();
+        const auto& triangles = loader.getTriangles();
+        
+        if (!materials.empty()) {
+            std::cout << "\n--- 材质详细信息 ---" << std::endl;
+            for (const auto& matPair : materials) {
+                const auto& mat = matPair.second;
+                std::cout << "材质名称: " << mat.name << std::endl;
+                std::cout << "  环境光: (" << mat.ambient[0] << ", " << mat.ambient[1] << ", " << mat.ambient[2] << ")" << std::endl;
+                std::cout << "  漫反射: (" << mat.diffuse[0] << ", " << mat.diffuse[1] << ", " << mat.diffuse[2] << ")" << std::endl;
+                std::cout << "  镜面反射: (" << mat.specular[0] << ", " << mat.specular[1] << ", " << mat.specular[2] << ")" << std::endl;
+                std::cout << "  光泽度: " << mat.shininess << std::endl;
+                if (mat.hasDiffuseTexture()) {
+                    std::cout << "  漫反射纹理: " << mat.diffuseTexture << std::endl;
+                    std::cout << "  完整纹理路径: " << mat.getFullTexturePath(loader.getBasePath()) << std::endl;
+                }
+                std::cout << std::endl;
+            }
+        }
+        
+        // Count triangles with materials and textures
+        int trianglesWithMaterials = 0;
+        int trianglesWithTextures = 0;
+        for (const auto& triangle : triangles) {
+            if (triangle.hasMaterial()) {
+                trianglesWithMaterials++;
+                if (triangle.hasDiffuseTexture()) {
+                    trianglesWithTextures++;
+                }
+            }
+        }
+        
+        std::cout << "--- 三角形材质统计 ---" << std::endl;
+        std::cout << "总三角形数: " << triangles.size() << std::endl;
+        std::cout << "有材质的三角形: " << trianglesWithMaterials << std::endl;
+        std::cout << "有纹理的三角形: " << trianglesWithTextures << std::endl;
         std::cout << "✓ 法向量支持: " << (nCount > 0 ? "通过" : "无法向量") << std::endl;
         std::cout << "✓ 对象名称支持: " << (!loader.getCurrentObjectName().empty() ? "通过" : "无对象名") << std::endl;
     }

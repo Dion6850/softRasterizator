@@ -9,7 +9,7 @@
  * 
  */
 
-#include "core/camera.h"
+#include <Lsr3D/core/camera.h>
 
 camera::camera(const Eigen::Vector3f& position, const Eigen::Vector3f& up, float yaw, float pitch)
     : position(position)

@@ -2,15 +2,11 @@ cmake_minimum_required(VERSION 3.20)
 project(softResterizator)
 
 set(CMAKE_CXX_STANDARD 20)
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/src)
-file(GLOB_RECURSE SOURCE_FILES src/utils/*.cpp
-        src/core/*.cpp)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} main.cpp)
+add_executable(${PROJECT_NAME}  main.cpp)
 
 # test
-add_executable(test_load_image ${SOURCE_FILES} test/load_image.cpp)
+add_executable(test_load_image test/load_image.cpp)
 
 find_package(GLUT REQUIRED)
 if(GLUT_FOUND)
@@ -32,7 +28,7 @@ include_directories(thirdPart)
 target_compile_definitions(${PROJECT_NAME} PRIVATE STB_IMAGE_IMPLEMENTATION)
 target_compile_definitions(test_load_image PRIVATE STB_IMAGE_IMPLEMENTATION)
 
-# 添加loder模块
-add_subdirectory(loader)
-target_link_libraries(${PROJECT_NAME} loader)
+# 添加Lsr3D模块
+add_subdirectory(Lsr3D)
+target_link_libraries(${PROJECT_NAME} Lsr3D)
 

@@ -12,7 +12,7 @@
 #ifndef LOAD_IMAGE_H
 #define LOAD_IMAGE_H
 
-#include "stb/stb_image.h"
+#include <stb/stb_image.h>
 #include <GL/glut.h>
 #include <iostream>
 GLuint textureID;

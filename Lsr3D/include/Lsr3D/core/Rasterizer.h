@@ -13,8 +13,8 @@
 #define RASTERIZER_H
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#include "core/resource.h"
-#include "utils/MVP.h"
+#include <Lsr3D/core/camera.h>
+#include <Lsr3D/utils/MVP.h>
 namespace Rasterizer {
 
 class Rasterizer {

@@ -1,3 +1,4 @@
 build
 cmake-build-debug-visual-studioqt
 .vscode
+zhywyt_compile.bat

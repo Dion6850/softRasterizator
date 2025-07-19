@@ -1,13 +1,20 @@
 # Soft-Resterizator（软光栅渲染器）
 This project uses simple functions of FreeGLUT to draw a single point on the canvas, while performing other calculations on the CPU. It is aimed at learning how to create a software rasterizer.
 
-[project repo](https://git.zhywyt.me/Rendering/softResterizator.git)
+[gitea project repo](https://git.zhywyt.me/Rendering/softResterizator.git)
+[github project repo](https://github.com/Dion6850/softRasterizator.git)
 ## Quick Start
+You should change the `<path to your vcpkg root>` to the real path.
 ```cmd
+git submodule init
+git submodule update
 vcpkg install freeglut
-mkdir build
-cd build
-cmake .. -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cmake
+cmake -B build
+cmake --build build -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cmake
+```
+Just like this:
+```cmd
+cmake --build build -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
 ## Project tree
@@ -15,43 +22,20 @@ cmake .. -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cm
 ```bash
 |-- CMakeLists.txt
 |-- README.md
-|-- include
-|   |-- test
-|   |   |-- test1.h
-|   |   `-- test2.h
-|   `-- utils.h
+|-- Lsr3D
+|   |-- include
+|   |   |-- core
+|   |   |-- utils
+|   |   `-- test
+|   |-- src
+|   |   |-- core
+|   |   `-- utils
+|   `-- CMakeLists.txt
 |-- main.cpp
 |-- thirdPart
-|   `-- eigen-3.4.0
-|       `-- Eigen
+|   `-- eigen
+|   `-- stb
 
-```
-
-## test example
-
-In your test file at `include/test/your_test_name.h`:
-```cpp
-#pragma once
-#include <utils.h>
-namespace your_test_name{
-    void task(){
-        // ... TODO ...
-    }
-}
-```
-Then you can call it at the main display function at file `main.cpp`:
-```cpp
-// something others ...
-void disaplay(){
-     /*
-    ################## just can draw points ##################
-    */
-   your_test_name::task();
-    /*
-    ################## just can draw points ##################
-    */
-}
-// something anothers ...
 ```
 
 ## code format

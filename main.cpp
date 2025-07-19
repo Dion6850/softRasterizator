@@ -10,7 +10,7 @@
  *
  */
 #include <GL/freeglut.h>
-#include <test/test2.h>
+#include <Lsr3D/test/test2.h>
 
 
 void initializeOpenGL(int argc = 0, char** argv = nullptr);

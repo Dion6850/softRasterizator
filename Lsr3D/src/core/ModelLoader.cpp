@@ -1,4 +1,4 @@
-#include <ModelLoader.h>
+#include <Lsr3D/core/ModelLoader.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>

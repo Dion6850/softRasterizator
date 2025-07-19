@@ -11,8 +11,8 @@
 
 #ifndef CAMERA_H
 #define CAMERA_H
-#include "utils/MVP.h"
-#include "utils/utils.h"
+#include <Lsr3D/utils/MVP.h>
+#include <Lsr3D/utils/utils.h>
 
 class camera
 {

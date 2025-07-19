@@ -9,7 +9,7 @@
  * 
  */
 
-#include "utils/utils.h"
+#include <Lsr3D/utils/utils.h>
 void utils::DDA_Line(GLint startx, GLint starty, GLint endx, GLint endy)
 {
     glBegin(GL_POINTS);

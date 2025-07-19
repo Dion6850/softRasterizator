@@ -3,7 +3,7 @@
 #include <GL/freeglut.h>
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#include <utils/MVP.h>
+#include <Lsr3D/utils/MVP.h>
 /**
  * @brief Set Pixel Color
  * @param x x coordinate

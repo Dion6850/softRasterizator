@@ -10,7 +10,7 @@
  */
 #pragma once
 #include <iostream>
-#include <utils/utils.h>
+#include <Lsr3D/utils/utils.h>
 
     Eigen::Matrix4d get_view_matrix(const Eigen::Vector3d& eye,
                                     const Eigen::Vector3d& center,

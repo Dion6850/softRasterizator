@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Lsr3D/utils/MVP.h>
+#include <Lsr3D/core/resource.h>
 /**
  * @brief Set Pixel Color
  * @param x x coordinate
@@ -15,6 +16,11 @@
 inline void SetPixel(const int& x, const int& y, const Eigen::Vector3d& color)
 {
     glColor3f(color.x(), color.y(), color.z());
+    glVertex2i(x, y);
+}
+inline void SetPixel(const int& x, const int& y, const lsr3d::Color& color)
+{
+    glColor3f(color.r(), color.g(), color.b());
     glVertex2i(x, y);
 }
 

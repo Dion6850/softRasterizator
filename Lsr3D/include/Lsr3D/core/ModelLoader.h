@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <Lsr3D/core/resource.h>
+#include <Lsr3D/core/ImageLoader.h>
 using namespace lsr3d;
 
 /**

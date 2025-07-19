@@ -10,7 +10,7 @@
  *
  */
 #include <GL/freeglut.h>
-#include <Lsr3D/test/test3.h>
+#include <Lsr3D/test/test4.h>
 #include <iostream>
 #include <iomanip>
 
@@ -32,7 +32,7 @@ void displayFrameTime();
  * @brief init draw such as model load
  *
  */
-void Init();
+void Init(int width, int height);
 void Display();
 
 /**
@@ -114,7 +114,7 @@ void initializeOpenGL(int argc, char** argv) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, 512, 512, 0, -1, 1);
-    Init();
+    Init(512, 512);
 }
 /**
  * @brief Call back for window resize
@@ -127,4 +127,5 @@ void ResizeWindow(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, height, 0, -1, 1);
+    render::instance.resize(width, height);
 }

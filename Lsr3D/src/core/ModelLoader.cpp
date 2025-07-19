@@ -472,8 +472,14 @@ bool ModelLoader::parseMaterialLine(const std::string& line, Material& currentMa
             currentMaterial.textureName = tokens[1];
             lsr3d::ImageHandle handle = lsr3d::ImageHandle(currentImageIndex++);
             currentMaterial.imageHandle = handle;
-            images.emplace(handle, lsr3d::Image(currentMaterial.textureName));
-
+            try {
+                Image image = lsr3d::loadImage(currentMaterial.getFullTexturePath(basePath));
+                images.emplace(handle, image);
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error loading texture: " << e.what() << std::endl;
+                return false;
+            }
             return true;
         }
     }

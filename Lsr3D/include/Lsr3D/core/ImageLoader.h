@@ -11,7 +11,7 @@
 #pragma once
 #include <Lsr3D/core/resource.h>
 #include <string>
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 namespace lsr3d {
 
@@ -20,7 +20,7 @@ namespace lsr3d {
      * @param filename Path to the image file
      * @return ImageHandle if successful, invalid handle otherwise
      */
-    Image loadImage(const std::string& filename) {
+    inline Image loadImage(const std::string& filename) {
         int width, height, channels;
         stbi_set_flip_vertically_on_load(true);
         unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
@@ -28,6 +28,7 @@ namespace lsr3d {
             throw std::runtime_error("Failed to load image: " + filename);
         }
         lsr3d::Image image(filename, width, height, data, channels);
+        std::cout << "Loaded image: " << filename << " (" << width << "x" << height << ", " << channels << " channels)" << std::endl;
         return image;
     }
 

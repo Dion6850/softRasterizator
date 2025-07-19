@@ -31,3 +31,8 @@ include_directories(thirdPart)
 # 使用stb的模块需要提前定义
 target_compile_definitions(${PROJECT_NAME} PRIVATE STB_IMAGE_IMPLEMENTATION)
 target_compile_definitions(test_load_image PRIVATE STB_IMAGE_IMPLEMENTATION)
+
+# 添加loder模块
+add_subdirectory(loader)
+target_link_libraries(${PROJECT_NAME} loader)
+

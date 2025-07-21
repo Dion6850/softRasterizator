@@ -13,14 +13,14 @@ You should change the `<path to your vcpkg root>` to the real path.
 git submodule init
 git submodule update
 vcpkg install freeglut
-cmake -B build
-cmake --build build -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cmake
+cmake -B build -DOOLCHAIN_FILE=<path to your vcpkg root>/scripts/buildsystems/vcpkg.cmake
+cmake --build build 
 ```
 
 Just like this:
 
 ```cmd
-cmake --build build -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --B build -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
 ## Project tree

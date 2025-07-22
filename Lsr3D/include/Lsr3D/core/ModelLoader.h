@@ -65,38 +65,38 @@ namespace lsr3d
          * @brief Get all vertex positions
          * @return Constant reference to the vector of vertices
          */
-        const std::unordered_map<VertexHandle, Vertex>& getVertices() const;
+        const VertexDatas& getVertices() const;
 
         /**
          * @brief Get all triangles
          * @return Constant reference to the vector of triangles
          */
-        const std::unordered_map<TriangleHandle, Triangle>& getTriangles() const;
+        const TriangleDatas& getTriangles() const;
 
         /**
          * @brief Get all texture coordinates
          * @return Constant reference to the vector of texture coordinates
          */
-        const std::unordered_map<TextureCoordHandle, TextureCoord>& getTextureCoords() const;
+        const TextureCoordDatas& getTextureCoords() const;
 
         /**
          * @brief Get all vertex normals
          * @return Constant reference to the vector of vertex normals
          */
-        const std::unordered_map<NormalHandle, Normal>& getNormals() const;
+        const NormalDatas& getNormals() const;
 
         /**
          * @brief Get the Images object
          *
          * @return const std::unordered_map<ImageHandle, Image>&
          */
-        const std::unordered_map<ImageHandle, Image>& getImages() const;
+        const ImageDatas& getImages() const;
 
         /**
          * @brief Get all materials
          * @return Constant reference to the map of materials (name -> material)
          */
-        const std::map<std::string, Material>& getMaterials() const;
+        const MaterialDatas& getMaterials() const;
 
         /**
          * @brief Get the current object name

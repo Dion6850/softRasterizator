@@ -307,27 +307,27 @@ bool ModelLoader::parseFaceVertex(const std::string& vertexSpec, int& vertexInde
     }
 }
 
-const std::unordered_map<VertexHandle, Vertex>& ModelLoader::getVertices() const {
+const VertexDatas& ModelLoader::getVertices() const {
     return vertices;
 }
 
-const std::unordered_map<TriangleHandle, Triangle>& ModelLoader::getTriangles() const {
+const TriangleDatas& ModelLoader::getTriangles() const {
     return triangles;
 }
 
-const std::unordered_map<TextureCoordHandle, TextureCoord>& ModelLoader::getTextureCoords() const {
+const TextureCoordDatas& ModelLoader::getTextureCoords() const {
     return textureCoords;
 }
 
-const std::unordered_map<NormalHandle, Normal>& ModelLoader::getNormals() const {
+const NormalDatas& ModelLoader::getNormals() const {
     return normals;
 }
 
-const std::unordered_map<ImageHandle, Image>& ModelLoader::getImages() const {
+const ImageDatas& ModelLoader::getImages() const {
     return images;
 }
 
-const std::map<std::string, Material>& ModelLoader::getMaterials() const {
+const MaterialDatas& ModelLoader::getMaterials() const {
     return materials;
 }
 
@@ -375,7 +375,6 @@ bool ModelLoader::loadMaterialFile(const std::string& filename, const std::strin
             // not throw or exit
         }
     }
-    
     // Add the last material if it has a name
     if (!currentMaterial.name.empty()) {
         materials[currentMaterial.name] = currentMaterial;

@@ -32,7 +32,7 @@ namespace lsr3d
     using TextureCoordDatas = std::unordered_map<TextureCoordHandle, lsr3d::TextureCoord>;
     using NormalDatas = std::unordered_map<NormalHandle, lsr3d::Normal>;
     using ImageDatas = std::unordered_map<ImageHandle, lsr3d::Image>;
-    using MaterialDatas = std::map<std::string, lsr3d::Material>;
+    using MaterialDatas = std::unordered_map<std::string, lsr3d::Material>;
     using ColorDatas = std::unordered_map<ColorHandle, lsr3d::Color>;
     using NVec = Eigen::Vector4f; ///< normal vector type
     struct Vertex {

@@ -53,7 +53,7 @@ Eigen::Matrix4f MVP::cal_projection_matrix(const float& fov, const float& aspect
     float tan_half_fov = tan(rad / 2);
     projection << 1 / (aspect * tan_half_fov), 0, 0, 0,
         0, 1 / tan_half_fov, 0, 0,
-        0, 0, (far + near) / (far - near),2* (far * near) / (far - near),
+        0, 0, (far + near) / (far - near),-2* (far * near) / (far - near),
         0, 0, -1, 0;
     return projection;
 }

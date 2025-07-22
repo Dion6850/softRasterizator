@@ -31,9 +31,9 @@ public:
            const Eigen::Vector3f& target = Eigen::Vector3f(0.0f, 0.0f, 0.0f),
            const Eigen::Vector3f& up = Eigen::Vector3f(0.0f, 1.0f, 0.0f),
            float fov = 45.0f,
+           float aspect = 4.0f/3.0f,
            float zNear = 0.1f,
-           float zFar = 100.0f,
-           float aspect = 4.0f/3.0f);
+           float zFar = 100.0f);
 
     // 快速获取VP矩阵
     inline Eigen::Matrix4f getVPMatrix() const {

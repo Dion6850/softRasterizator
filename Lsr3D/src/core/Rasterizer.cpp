@@ -70,13 +70,6 @@ namespace lsr3d {
                 };
                 lsr3d::fragementOutputData fragmentOutput;
                 fragmentShader.shading(fragmentInput, fragmentOutput);
-                // std::cout << "\rFragment Shader Output: "
-                //     << x << ", "
-                //     << y << " "
-                //     << " color : "
-                //     << fragmentOutput.color.r() << " "
-                //     << fragmentOutput.color.g() << " "
-                //     << fragmentOutput.color.b() << std::endl;
                 SetPixel(x, y, fragmentOutput.color);
             }
         }

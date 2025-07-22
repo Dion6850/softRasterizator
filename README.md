@@ -23,6 +23,14 @@ Just like this:
 cmake --B build -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
+## Error Version Info
+
+**There is a error version, you can build with this result:**
+
+![img](assets/img/crash_bunny.png)
+
+**There is a bunny crashed by some mistery power such as `error project matrix`. OK It's just a joke, but i want save this ineresting error version named `crashedBunny`.**
+
 ## Project tree
 
 ```bash

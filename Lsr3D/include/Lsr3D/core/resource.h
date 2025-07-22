@@ -15,6 +15,8 @@
 
 #include <Eigen/Core>
 #include <Lsr3D/core/handle.h>
+#include <unordered_map>
+#include <map>
 using lsr3d::Handle;
 using lsr3d::VertexHandle;
 using lsr3d::TextureCoordHandle;
@@ -23,14 +25,41 @@ using lsr3d::NormalHandle;
 
 namespace lsr3d
 {
+    struct Vertex;struct TextureCoord;struct Normal;struct Color;
+    struct Triangle;struct Material;struct TriangleData;struct Image;
+    using TriangleDatas = std::unordered_map<TriangleHandle, lsr3d::Triangle>;
+    using VertexDatas = std::unordered_map<VertexHandle, lsr3d::Vertex>;
+    using TextureCoordDatas = std::unordered_map<TextureCoordHandle, lsr3d::TextureCoord>;
+    using NormalDatas = std::unordered_map<NormalHandle, lsr3d::Normal>;
+    using ImageDatas = std::unordered_map<ImageHandle, lsr3d::Image>;
+    using MaterialDatas = std::map<std::string, lsr3d::Material>;
+    using ColorDatas = std::unordered_map<ColorHandle, lsr3d::Color>;
     using NVec = Eigen::Vector4f; ///< normal vector type
     struct Vertex {
         NVec position; ///< 4D position vector (x, y, z, 1)
         Vertex(float x = 0.0f, float y = 0.0f, float z = 0.0f)
             : position(x, y, z, 1.0f) {
         } ///< Constructor with optional coordinates
+        Vertex(NVec pos)
+            : position(std::move(pos)) {
+        } ///< Constructor with Eigen::Vector4f
         operator Eigen::Vector4f () const {
             return position; ///< Implicit conversion to Eigen::Vector4f
+        }
+        Vertex operator* (float scalar) const {
+            return Vertex(position * scalar);
+        }
+        Vertex operator+ (const Vertex& other) const {
+            return Vertex(position + other.position);
+        }
+        Vertex operator- (const Vertex& other) const {
+            return Vertex(position - other.position);
+        }
+        Vertex operator/ (float scalar) const {
+            if (scalar == 0.0f) {
+                throw std::runtime_error("Division by zero in Vertex division");
+            }
+            return Vertex(position / scalar);
         }
     };
 
@@ -49,6 +78,27 @@ namespace lsr3d
         float& v(){
             return uv[1]; ///< Get y coordinate (v)
         } ///< Get v coordinate
+        float u() const {
+            return uv[0]; ///< Get x coordinate (u) as const
+        } ///< Get u coordinate as const
+        float v() const {
+            return uv[1]; ///< Get y coordinate (v) as const
+        } ///< Get v coordinate as const
+        TextureCoord operator* (float scalar) const {
+            return TextureCoord(uv * scalar);
+        } ///< Scale texture coordinates by a scalar
+        TextureCoord operator+ (const TextureCoord& other) const {
+            return TextureCoord(uv + other.uv);
+        } ///< Add two texture coordinates
+        TextureCoord operator- (const TextureCoord& other) const {
+            return TextureCoord(uv - other.uv);
+        } ///< Subtract two texture coordinates
+        TextureCoord operator/ (float scalar) const {
+            if (scalar == 0.0f) {
+                throw std::runtime_error("Division by zero in TextureCoord division");
+            }
+            return TextureCoord(uv / scalar);
+        } ///< Divide texture coordinates by a scalar
     };
 
     struct Normal {
@@ -56,6 +106,32 @@ namespace lsr3d
         Normal(float x = 0.0f, float y = 0.0f, float z = 0.0f)
             : normal(x, y, z, 1.0f) {
         } ///< Constructor with optional coordinates
+        Normal(NVec normal_)
+            : normal(std::move(normal_)) {
+        } ///< Constructor with Eigen::Vector4f
+        operator Eigen::Vector4f() const {
+            return normal; ///< Implicit conversion to Eigen::Vector4f
+        }
+        Normal operator*(float scalar) const {
+            return Normal(normal * scalar);
+        }
+        Normal operator+(const Normal& other) const {
+            return Normal(normal + other.normal);
+        }
+        Normal operator-(const Normal& other) const {
+            return Normal(normal - other.normal);
+        }        Normal operator/(float scalar) const {
+            if (scalar == 0.0f) {               throw std::runtime_error("Division by zero in Normal division");
+            }
+            return Normal(normal / scalar);
+        }
+        Normal normalized() const {
+            float length = normal.norm();
+            if (length > 0) {
+                return Normal(normal / length);
+            }
+            return Normal();
+        }
     };
 
     struct Color {
@@ -63,6 +139,9 @@ namespace lsr3d
         Color(float r = 255.0f, float g = 255.0f, float b = 255.0f, float a = 255.0f)
             : color(r, g, b, a) {
         } ///< Constructor with optional RGBA values
+        Color(Eigen::Vector4f color_)
+            : color(std::move(color_)) {
+        } ///< Constructor with Eigen::Vector4f
         operator Eigen::Vector4f() const {
             return color; ///< Implicit conversion to Eigen::Vector4f
         }
@@ -71,31 +150,19 @@ namespace lsr3d
         float b() const { return color[2]; } ///< Get blue component
         float a() const { return color[3]; } ///< Get alpha component
         Color operator+(const Color& other) const {
-            return Color(color[0] + other.color[0],
-                color[1] + other.color[1],
-                color[2] + other.color[2],
-                color[3] + other.color[3]);
+            return Color(color + other.color);
         }
         Color operator-(const Color& other) const {
-            return Color(color[0] - other.color[0],
-                color[1] - other.color[1],
-                color[2] - other.color[2],
-                color[3] - other.color[3]);
+            return Color(color - other.color);
         }
         Color operator*(const Color& other) const {
-            return Color(color[0] * other.color[0],
-                color[1] * other.color[1],
-                color[2] * other.color[2],
-                color[3] * other.color[3]);
+            return Color(color.cwiseProduct(other.color));
         }
         Color operator/(float scalar) const {
             if (scalar == 0.0f) {
                 throw std::runtime_error("Division by zero in Color division");
             }
-            return Color(color[0] / scalar,
-                color[1] / scalar,
-                color[2] / scalar,
-                color[3] / scalar);
+            return Color(color / scalar);
         }
     };
 
@@ -119,7 +186,6 @@ namespace lsr3d
         Image(std::string _name, int _width, int _height, unsigned char* _data, unsigned int _channel = 4)
             : name(std::move(_name)), width(_width), height(_height), data(_data, _data + (_width * _height * _channel)), channels(_channel) {
         }
-
         Color SampleNearest(Uv uv) const {
             return SampleNearest(uv[0], uv[1]);
         }
@@ -233,17 +299,38 @@ namespace lsr3d
         }
     };
     /**
-     * @brief Represents a triangle with vertex, texture, and normal indices
+     * @brief Restore triangle data
+     *
+     */
+    struct TriangleData{
+        Vertex v0, v1, v2;                    ///< Vertex positions
+        TextureCoord t0, t1, t2;             ///< Texture coordinates (if available
+        Color c0, c1, c2;                    ///< Vertex colors (if available)
+        Normal n0, n1, n2;                   ///< Vertex normals (if available)
+        bool hasTextures;                     ///< Whether texture coordinates are available
+        bool hasNormals;                      ///< Whether vertex normals are available
+        std::string materialName;             ///< Name of the material used by this triangle
+        const Material* material_;             ///< Pointer to the material (set after materials are loaded)
+        TriangleData()
+            : hasTextures(false), hasNormals(false), material_(nullptr) {}
+        bool hasMaterial() const {
+            return material_ != nullptr;
+        }
+    
+    };
+    /**
+     * @brief Restore triangle data with handle
      * @details Each triangle stores indices into the respective arrays for maximum flexibility
      */
     struct Triangle {
         VertexHandle v0, v1, v2;                    ///< Vertex positions
         TextureCoordHandle t0, t1, t2;             ///< Texture coordinates (if available)
         NormalHandle n0, n1, n2;                   ///< Vertex normals (if available)
-        bool hasTextures;                     ///< Whether texture coordinates are available
-        bool hasNormals;                      ///< Whether vertex normals are available
-        std::string materialName;             ///< Name of the material used by this triangle
-        const Material* material_;             ///< Pointer to the material (set after materials are loaded)
+        ColorHandle c0, c1, c2;                    ///< Vertex colors (if available)
+        bool hasTextures;                           ///< Whether texture coordinates are available
+        bool hasNormals;                            ///< Whether vertex normals are available
+        std::string materialName;                   ///< Name of the material used by this triangle
+        const Material* material_;                   ///< Pointer to the material (set after materials are loaded)
 
         /**
          * @brief Constructor
@@ -257,9 +344,93 @@ namespace lsr3d
         bool hasMaterial() const {
             return material_ != nullptr;
         }
+        /**
+         *@brief  copy data from data store
+         * @param triangleDatas 
+         * @param vertexDatas 
+         * @param textureCoordDatas 
+         * @param normalDatas 
+         * @return TriangleData 
+         */
+        TriangleData toRawData(const TriangleDatas& triangleDatas,
+                                 const VertexDatas& vertexDatas,
+                                 const TextureCoordDatas& textureCoordDatas,
+                                 const NormalDatas& normalDatas,
+                                 const ColorDatas& colorDatas = {}
+                            ) const {
+            TriangleData data;
+            data.v0 = v0.is_valid()? vertexDatas.at(v0) : Vertex();
+            data.v1 = v1.is_valid()? vertexDatas.at(v1) : Vertex();
+            data.v2 = v2.is_valid()? vertexDatas.at(v2) : Vertex();
+
+            data.t0 = t0.is_valid()? textureCoordDatas.at(t0) : TextureCoord();
+            data.t1 = t1.is_valid()? textureCoordDatas.at(t1) : TextureCoord();
+            data.t2 = t2.is_valid()? textureCoordDatas.at(t2) : TextureCoord();
+
+            data.n0 = n0.is_valid()? normalDatas.at(n0) : Normal();
+            data.n1 = n1.is_valid()? normalDatas.at(n1) : Normal();
+            data.n2 = n2.is_valid()? normalDatas.at(n2) : Normal();
+
+            data.c0 = c0.is_valid()? colorDatas.at(c0) : Color();
+            data.c1 = c1.is_valid()? colorDatas.at(c1) : Color();
+            data.c2 = c2.is_valid()? colorDatas.at(c2) : Color();
+
+            data.hasTextures = hasTextures;
+            data.hasNormals = hasNormals;
+            data.materialName = materialName;
+            data.material_ = material_;
+            return data;
+        }
     };
 
 
-
 }
+
+
+/* shader and rasterizer data */
+namespace lsr3d
+{
+    /**
+     * @brief Vertex input data structure for the vertex shader
+     * @warning Can not be empty parameter create
+     */
+    struct vertexInputData {
+        lsr3d::TriangleData triangle;
+        Eigen::Matrix4f MVP;
+        int width, height; ///< Viewport size for screen space conversion
+    };
+    /**
+     * @brief Fragment output data structure for the fragment shader
+     * @warning Can be empty parameter create
+     */
+    struct vertexOutputData {
+        lsr3d::TriangleData triangle;
+        bool discard = false;
+    };
+
+    /**
+     * @brief Fragment input data structure for the fragment shader
+     * @warning Can not be empty parameter create
+     */
+    struct fragementInputData {
+
+        /* vertex shader output data */
+        lsr3d::Uv position;
+        lsr3d::TextureCoord textureCoord;
+        lsr3d::Normal normal;
+        lsr3d::Color color;
+        const lsr3d::Material* material_ = nullptr;
+
+        /* other input */
+        const lsr3d::ImageDatas& images; ///< Image handle for texture sampling
+
+        /* TODO: light info */
+
+    };
+    struct fragementOutputData {
+        lsr3d::Color color; ///< Output color after shading
+        /* not output depth */
+        // float depth; ///< Depth value for depth testing
+    };
+} // namespace std
 #endif //RESOURCE_H

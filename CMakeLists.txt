@@ -27,3 +27,5 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE STB_IMAGE_IMPLEMENTATION)
 add_subdirectory(Lsr3D)
 target_link_libraries(${PROJECT_NAME} Lsr3D)
 
+# 添加多核编译
+add_compile_options(-j $(nproc))

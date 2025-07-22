@@ -64,6 +64,8 @@ namespace lsr3d {
 	class NormalHandle : public Handle { public: explicit NormalHandle(int _idx = -1) : Handle(_idx) {} };
 	class MaterialHandle : public Handle { public: explicit MaterialHandle(int _idx = -1) : Handle(_idx) {} };
 	class ImageHandle : public Handle { public: explicit ImageHandle(int _idx = -1) : Handle(_idx) {} };
+	class ColorHandle : public Handle { public: explicit ColorHandle(int _idx = -1) : Handle(_idx) {} };
+	class ModelHandle : public Handle { public: explicit ModelHandle(int _idx = -1) : Handle(_idx) {} };
 }
 
 /*======================特化各种iGameHandle的哈希映射============================*/
@@ -117,7 +119,22 @@ namespace std
 			return hash<int>()(h.idx());
 		}
 	};
-
+	template<>
+	struct hash<lsr3d::ColorHandle>
+	{
+		size_t operator()(const lsr3d::ColorHandle& h)const
+		{
+			return hash<int>()(h.idx());
+		}
+	};
+	template<>
+	struct hash<lsr3d::ModelHandle>
+	{
+		size_t operator()(const lsr3d::ModelHandle& h)const
+		{
+			return hash<int>()(h.idx());
+		}
+	};
 }
 
 

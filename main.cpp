@@ -10,12 +10,10 @@
  *
  */
 #include <GL/freeglut.h>
-#include <Lsr3D/test/test4.h>
+#include <Lsr3D/test/test5.h>
 #include <iostream>
 #include <iomanip>
 
-// 定义静态成员变量
-render render::instance;
 
 // 帧时间统计变量
 static int lastTime = 0;
@@ -26,6 +24,9 @@ static float frameTime = 0.0f;
 // 定义初始窗口大小
 const int initialWidth = 1024;
 const int initialHeight = 1024;
+
+// 定义静态员变量
+lsr3d::Renderer lsr3d::Renderer::instance(initialWidth, initialHeight);
 
 void initializeOpenGL(int argc = 0, char** argv = nullptr);
 void ResizeWindow(int width, int height);
@@ -130,5 +131,5 @@ void ResizeWindow(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, height, 0, -1, 1);
-    render::instance.resize(width, height);
+    lsr3d::Renderer::instance.resize(width, height);
 }

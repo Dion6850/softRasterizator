@@ -174,44 +174,63 @@ void draw_triangle(const lsr3d::Triangle& triangle,const lsr3d::Material& materi
     Eigen::Vector2i v0_pixel(static_cast<int>(v0_screen.x()), static_cast<int>(v0_screen.y()));
     Eigen::Vector2i v1_pixel(static_cast<int>(v1_screen.x()), static_cast<int>(v1_screen.y()));
     Eigen::Vector2i v2_pixel(static_cast<int>(v2_screen.x()), static_cast<int>(v2_screen.y()));
+    #define FACE_CULL 1
     for (int i = min_y; i <= max_y; i++) {
         for (int j = min_x; j <= max_x; j++) {
             // 计算实际的屏幕坐标
             int screen_j = j + screen_width / 2;
             int screen_i = i + screen_length / 2;
-            if(screen_i < 0 || screen_i >= screen_length || screen_j < 0 || screen_j >= screen_width) {
-                continue; // skip pixels outside the screen
+            {   // 检查屏幕边界
+                if (screen_i < 0 || screen_i >= screen_length || screen_j < 0 || screen_j >= screen_width) {
+                    continue; // skip pixels outside the screen
+                }
+            }
+            float area = cross(v1_pixel - v0_pixel, v2_pixel - v1_pixel);
+            {   // 剔除操作
+#if (FACE_CULL)
+                // 面剔除
+                // ? NOTE: There is some bugs, debug then seted the area > 0
+                // camera look at -z direction, so if area > 0, it is back-facing
+                if (area > 0) {
+                    continue; // skip back-facing triangles
+                }
+#endif
+                area = std::abs(area);
+                if (area == 0) {
+                    continue; // skip degenerate triangle
+                }
             }
             Eigen::Vector2i pixel(j, i);
-            // 计算重心坐标
             Eigen::Vector3f barycentric;
-            float area = cross(v1_pixel - v0_pixel, v2_pixel - v0_pixel);
-            if (area == 0) {
-                continue; // skip degenerate triangle
+            {   // 计算重心坐标
+                barycentric.x() = cross(v1_pixel - pixel, v2_pixel - pixel) / area;
+                barycentric.y() = cross(v2_pixel - pixel, v0_pixel - pixel) / area;
+                barycentric.z() = cross(v0_pixel - pixel, v1_pixel - pixel) / area;
             }
-            barycentric.x() = cross(v1_pixel - pixel, v2_pixel - pixel) / area;
-            barycentric.y() = cross(v2_pixel - pixel, v0_pixel - pixel) / area;
-            barycentric.z() = cross(v0_pixel - pixel, v1_pixel - pixel) / area;
-            // 检查是否在三角形内
-            if (barycentric.x() < 0 || barycentric.y() < 0 || barycentric.z() < 0) {
-                continue; // skip pixels outside the triangle
+            {   // 检查是否在三角形内
+                if (barycentric.x() < 0 || barycentric.y() < 0 || barycentric.z() < 0) {
+                    continue; // skip pixels outside the triangle
+                }
             }
-            // 深度测试 - 使用view space中的z值
             float z = barycentric.x() * v0_screen.z() + barycentric.y() * v1_screen.z() + barycentric.z() * v2_screen.z();
-
-            // 深度测试：更近的物体（更大的z值，因为view space中z是负的）
-            if (z < render::instance.depthBuffer[screen_i][screen_j]) {
-                continue; // skip pixels that are farther away
+            {   // 深度测试
+                // 更近的物体（更大的z值，因为view space中z是负的）
+                if (z < render::instance.depthBuffer[screen_i][screen_j]) {
+                    continue;
+                }
             }
-            lsr3d::TextureCoord uv;
             lsr3d::Color color(barycentric.x(), barycentric.y(), barycentric.z(), 1.0f); // 红色作为默认颜色
-            uv.u() = barycentric.x() * uv0.u() + barycentric.y() * uv1.u() + barycentric.z() * uv2.u();
-            uv.v() = barycentric.x() * uv0.v() + barycentric.y() * uv1.v() + barycentric.z() * uv2.v();
-            if (haveTextureImage) {
-                color = image->SampleNearest(uv.u(), uv.v());
-                // color = image->SampleLinear(uv.u(), uv.v());
-                color = color / 255.0f;
+            {   // 纹理采样
+                if (haveTextureImage) {
+                    lsr3d::TextureCoord uv;
+                    uv.u() = barycentric.x() * uv0.u() + barycentric.y() * uv1.u() + barycentric.z() * uv2.u();
+                    uv.v() = barycentric.x() * uv0.v() + barycentric.y() * uv1.v() + barycentric.z() * uv2.v();
+                    color = image->SampleNearest(uv.u(), uv.v());
+                    // color = image->SampleLinear(uv.u(), uv.v());
+                    color = color / 255.0f;
+                }
             }
+            // 更新深度缓冲区
             render::instance.depthBuffer[screen_i][screen_j] = z;
             SetPixel(screen_j, screen_i, color);
         }

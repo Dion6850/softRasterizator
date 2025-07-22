@@ -1,34 +1,46 @@
-#ifndef  UTILS_H
-#define UTILS_
+/**
+ * @file utils.h
+ * @author zhywyt (zhywyt@yeah.net)
+ * @brief
+ * @version 0.1
+ * @date 2025-07-22
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
+#pragma once
 #include <GL/freeglut.h>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Lsr3D/utils/MVP.h>
 #include <Lsr3D/core/resource.h>
-/**
- * @brief Set Pixel Color
- * @param x x coordinate
- * @param y y coordinate
- * @param color color vector (255,255,255)
- * @details The coordinate system takes the top-left corner of the screen as the origin, with x going right and y going down.
- * @warning Must be wrapped in glBegin(GL_POINTS) and glEnd().
- */
-inline void SetPixel(const int& x, const int& y, const Eigen::Vector3d& color)
+namespace lsr3d
 {
-    glColor3f(color.x(), color.y(), color.z());
-    glVertex2i(x, y);
-}
-inline void SetPixel(const int& x, const int& y, const lsr3d::Color& color)
-{
-    glColor3f(color.r(), color.g(), color.b());
-    glVertex2i(x, y);
-}
+    /**
+     * @brief Set Pixel Color
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param color color vector (255,255,255)
+     * @details The coordinate system takes the top-left corner of the screen as the origin, with x going right and y going down.
+     * @warning Must be wrapped in glBegin(GL_POINTS) and glEnd().
+     */
+    inline void SetPixel(const int& x, const int& y, const Eigen::Vector3d& color) {
+        glColor3f(color.x(), color.y(), color.z());
+        glVertex2i(x, y);
+    }
+    inline void SetPixel(const int& x, const int& y, const lsr3d::Color& color) {
+        glColor3f(color.r(), color.g(), color.b());
+        glVertex2i(x, y);
+    }
 
-inline int cross(Eigen::Vector2i a, Eigen::Vector2i b)
-{
-    return a.x() * b.y() - a.y() * b.x();
-}
+    inline int cross(Eigen::Vector2i a, Eigen::Vector2i b) {
+        return a.x() * b.y() - a.y() * b.x();
+    }
+    inline float cross2F(Eigen::Vector2f a, Eigen::Vector2f b) {
+        return a.x() * b.y() - a.y() * b.x();
+    }
 
+}
 namespace utils
 {
     /**
@@ -36,8 +48,7 @@ namespace utils
      * @param degrees 度
      * @return 弧度
      */
-    constexpr double deg2rad(double degrees)
-    {
+    constexpr double deg2rad(double degrees) {
         return degrees * M_PI / 180.0;
     }
 
@@ -46,8 +57,7 @@ namespace utils
      * @param radians 弧度
      * @return 度
      */
-    constexpr double rad2deg(double radians)
-    {
+    constexpr double rad2deg(double radians) {
         return radians * 180.0 / M_PI;
     }
 
@@ -93,4 +103,4 @@ namespace utils
     void BRESENHAM_Line(GLint startx, GLint starty, GLint endx, GLint endy);
 
 }
-#endif
+

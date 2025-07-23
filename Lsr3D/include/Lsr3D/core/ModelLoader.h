@@ -145,8 +145,14 @@ namespace lsr3d
         lsr3d::NormalDatas normals; ///< Vertex normals
         lsr3d::TriangleDatas triangles; ///< Triangulated faces
         lsr3d::ImageDatas images; ///< Image resources
-        lsr3d::MaterialDatas materials; ///< Materials by name
+        lsr3d::MaterialDatas materials; ///< Materials by handle
         lsr3d::ColorDatas colors; ///< Vertex colors
+
+        /**
+         * @brief Map material names to their handles
+         * @warning material name is private data, maybe need not to expose it
+         */
+        std::unordered_map<std::string, MaterialHandle> materialNameToHandle; ///< Map from material name to handle
 
         std::string currentObjectName;             ///< Current object name
         std::string currentMaterial;               ///< Current material name
@@ -158,6 +164,7 @@ namespace lsr3d
         int currentTriangleIndex = 0; ///< Current triangle index for generating handles
         int currentImageIndex = 0; ///< Current image index for generating handles
         int currentColorIndex = 0; ///< Current color index for generating handles
+        int currentMaterialIndex = 0; ///< Current material index for generating handles
 
         Eigen::Matrix4f modelMatrix = Eigen::Matrix4f::Identity(); ///< Model matrix for transformations
         /**

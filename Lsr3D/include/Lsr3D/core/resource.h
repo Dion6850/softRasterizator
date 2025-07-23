@@ -32,7 +32,7 @@ namespace lsr3d
     using TextureCoordDatas = std::unordered_map<TextureCoordHandle, lsr3d::TextureCoord>;
     using NormalDatas = std::unordered_map<NormalHandle, lsr3d::Normal>;
     using ImageDatas = std::unordered_map<ImageHandle, lsr3d::Image>;
-    using MaterialDatas = std::unordered_map<std::string, lsr3d::Material>;
+    using MaterialDatas = std::unordered_map<MaterialHandle, lsr3d::Material>;
     using ColorDatas = std::unordered_map<ColorHandle, lsr3d::Color>;
     using NVec = Eigen::Vector4f; ///< normal vector type
     struct Vertex {
@@ -186,9 +186,21 @@ namespace lsr3d
         Image(std::string _name, int _width, int _height, unsigned char* _data, unsigned int _channel = 4)
             : name(std::move(_name)), width(_width), height(_height), data(_data, _data + (_width * _height * _channel)), channels(_channel) {
         }
+        /**
+         * @brief Sample the image using nearest neighbor interpolation
+         *
+         * @return Color (0, 255)
+         * @warning You need convert the result to [0, 1] range
+         */
         Color SampleNearest(Uv uv) const {
             return SampleNearest(uv[0], uv[1]);
         }
+        /**
+         * @brief Sample the image using bilinear interpolation
+         *
+         * @return Color (0, 255)
+         * @warning You need convert the result to [0, 1] range
+         */
         Color SampleNearest(float u, float v) const {
             if (data.empty()) {
                 return Color(); // Return transparent color if data is empty
@@ -202,9 +214,21 @@ namespace lsr3d
             // Calculate index in the data array
             return getRGBA(x, y);
         }
+        /**
+         * @brief Sample the image using bilinear interpolation
+         *
+         * @return Color (0, 255)
+         * @warning You need convert the result to [0, 1] range
+         */
         Color SampleLinear(Uv uv) const {
             return SampleLinear(uv[0], uv[1]);
         }
+        /**
+         * @brief Sample the image using bilinear interpolation
+         *
+         * @return Color (0, 255)
+         * @warning You need convert the result to [0, 1] range
+         */
         Color SampleLinear(float u, float v) const {
             if (data.empty()) {
                 return Color(); // Return transparent color if data is empty
@@ -282,7 +306,9 @@ namespace lsr3d
         bool hasDiffuseTexture() const {
             return !textureName.empty();
         }
-
+        bool isValid() const {
+            return !name.empty();
+        }
         /**
          * @brief Get the full texture path (can be used with base path)
          * @param basePath Base directory path
@@ -310,11 +336,11 @@ namespace lsr3d
         bool hasTextures;                     ///< Whether texture coordinates are available
         bool hasNormals;                      ///< Whether vertex normals are available
         std::string materialName;             ///< Name of the material used by this triangle
-        const Material* material_;             ///< Pointer to the material (set after materials are loaded)
+        Material material;             ///< Pointer to the material (set after materials are loaded)
         TriangleData()
-            : hasTextures(false), hasNormals(false), material_(nullptr) {}
+            : hasTextures(false), hasNormals(false), material() {}
         bool hasMaterial() const {
-            return material_ != nullptr;
+            return material.isValid();
         }
     
     };
@@ -330,19 +356,19 @@ namespace lsr3d
         bool hasTextures;                           ///< Whether texture coordinates are available
         bool hasNormals;                            ///< Whether vertex normals are available
         std::string materialName;                   ///< Name of the material used by this triangle
-        const Material* material_;                   ///< Pointer to the material (set after materials are loaded)
+        MaterialHandle material;                   ///< Pointer to the material (set after materials are loaded)
 
         /**
          * @brief Constructor
          */
-        Triangle() : hasTextures(false), hasNormals(false), material_(nullptr) {}
+        Triangle() : hasTextures(false), hasNormals(false), material() {}
 
         /**
          * @brief Check if this triangle has a valid material assigned
          * @return true if material is not null
          */
         bool hasMaterial() const {
-            return material_ != nullptr;
+            return material.isValid();
         }
         /**
          *@brief  copy data from data store
@@ -356,29 +382,31 @@ namespace lsr3d
                                  const VertexDatas& vertexDatas,
                                  const TextureCoordDatas& textureCoordDatas,
                                  const NormalDatas& normalDatas,
+                                 const MaterialDatas& materialDatas,
                                  const ColorDatas& colorDatas = {}
                             ) const {
             TriangleData data;
-            data.v0 = v0.is_valid()? vertexDatas.at(v0) : Vertex();
-            data.v1 = v1.is_valid()? vertexDatas.at(v1) : Vertex();
-            data.v2 = v2.is_valid()? vertexDatas.at(v2) : Vertex();
+            data.v0 = v0.isValid()? vertexDatas.at(v0) : Vertex();
+            data.v1 = v1.isValid()? vertexDatas.at(v1) : Vertex();
+            data.v2 = v2.isValid()? vertexDatas.at(v2) : Vertex();
 
-            data.t0 = t0.is_valid()? textureCoordDatas.at(t0) : TextureCoord();
-            data.t1 = t1.is_valid()? textureCoordDatas.at(t1) : TextureCoord();
-            data.t2 = t2.is_valid()? textureCoordDatas.at(t2) : TextureCoord();
+            data.t0 = t0.isValid()? textureCoordDatas.at(t0) : TextureCoord();
+            data.t1 = t1.isValid()? textureCoordDatas.at(t1) : TextureCoord();
+            data.t2 = t2.isValid()? textureCoordDatas.at(t2) : TextureCoord();
 
-            data.n0 = n0.is_valid()? normalDatas.at(n0) : Normal();
-            data.n1 = n1.is_valid()? normalDatas.at(n1) : Normal();
-            data.n2 = n2.is_valid()? normalDatas.at(n2) : Normal();
+            data.n0 = n0.isValid()? normalDatas.at(n0) : Normal();
+            data.n1 = n1.isValid()? normalDatas.at(n1) : Normal();
+            data.n2 = n2.isValid()? normalDatas.at(n2) : Normal();
 
-            data.c0 = c0.is_valid()? colorDatas.at(c0) : Color();
-            data.c1 = c1.is_valid()? colorDatas.at(c1) : Color();
-            data.c2 = c2.is_valid()? colorDatas.at(c2) : Color();
+            data.c0 = c0.isValid()? colorDatas.at(c0) : Color();
+            data.c1 = c1.isValid()? colorDatas.at(c1) : Color();
+            data.c2 = c2.isValid()? colorDatas.at(c2) : Color();
+
+            data.material = material.isValid()? materialDatas.at(material) : Material();
 
             data.hasTextures = hasTextures;
             data.hasNormals = hasNormals;
             data.materialName = materialName;
-            data.material_ = material_;
             return data;
         }
     };
@@ -419,7 +447,7 @@ namespace lsr3d
         lsr3d::TextureCoord textureCoord;
         lsr3d::Normal normal;
         lsr3d::Color color;
-        const lsr3d::Material* material_ = nullptr;
+        lsr3d::Material material;
 
         /* other input */
         const lsr3d::ImageDatas& images; ///< Image handle for texture sampling

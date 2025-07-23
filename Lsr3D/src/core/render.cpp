@@ -35,7 +35,8 @@ namespace lsr3d
                 triangle.second.toRawData(model.getTriangles(),
                                           model.getVertices(),
                                           model.getTextureCoords(),
-                                          model.getNormals()),
+                                          model.getNormals(),
+                                          model.getMaterials()),
                 camera.getMVPMatrix(model.getModelMatrix()),
                 width, height // Pass viewport size for screen space conversion
             };

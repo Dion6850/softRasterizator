@@ -29,7 +29,7 @@ namespace lsr3d {
 		}
 
 		//判定handle是否存在
-		inline bool is_valid() const { return idx_ != -1; }
+		inline bool isValid() const { return idx_ != -1; }
 		/*===========================================handle的比较操作===========================================*/
 		inline bool operator<(const Handle& _h) const { return (this->idx_ < _h.idx_); }
 

@@ -65,7 +65,7 @@ namespace lsr3d {
                     .textureCoord = interpolateUV(w0, w1, w2, input),
                     .normal = interpolateNormal(w0, w1, w2, input),
                     .color = interpolateColor(w0, w1, w2, input),
-                    .material_ = input.triangle.material_,
+                    .material = input.triangle.material,
                     .images = images
                 };
                 lsr3d::fragementOutputData fragmentOutput;

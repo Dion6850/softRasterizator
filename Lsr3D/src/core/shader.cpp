@@ -58,8 +58,12 @@ void lsr3d::triangleVertexShader::shading(const vertexInputData& input, vertexOu
     output.triangle.n1 = input.triangle.n1;
     output.triangle.n2 = input.triangle.n2;
 
+    output.triangle.t0 = input.triangle.t0;
+    output.triangle.t1 = input.triangle.t1;
+    output.triangle.t2 = input.triangle.t2;
+
     output.triangle.materialName = input.triangle.materialName;
-    output.triangle.material_ = input.triangle.material_;
+    output.triangle.material = input.triangle.material;
     output.triangle.hasTextures = input.triangle.hasTextures;
     output.triangle.hasNormals = input.triangle.hasNormals;
 }
@@ -72,13 +76,13 @@ void lsr3d::triangleFragmentShader::shading(const fragementInputData& input, fra
     const lsr3d::Uv& v0 = input.position;
     const lsr3d::TextureCoord& uv0 = input.textureCoord;
     const lsr3d::Normal& n0 = input.normal;                 // to cal lighting
-    const lsr3d::Material* material_ = input.material_;
-    if (material_ != nullptr) {
+    const auto material = input.material;
+    if (material.isValid()) {
         // 使用材质进行环境光照
-        if (const auto& image_ = input.images.find(material_->imageHandle);
-            image_ != input.images.end()) {
+        if (const auto& image = input.images.find(material.imageHandle);
+            image != input.images.end()) {
                 // 使用纹理进行环境光照
-                output.color = image_->second.SampleNearest(uv0.uv);
+                output.color = image->second.SampleNearest(uv0.uv)/255.0f;
         }
         /* TODO : cal lighting*/
     }

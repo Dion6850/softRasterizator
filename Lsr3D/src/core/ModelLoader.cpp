@@ -23,6 +23,7 @@ bool ModelLoader::loadModel(const std::string& filename) {
         triangles.clear();
         images.clear();
         materials.clear();
+        materialNameToHandle.clear();
 
         currentObjectName.clear();
         currentMaterial.clear();
@@ -377,7 +378,9 @@ bool ModelLoader::loadMaterialFile(const std::string& filename, const std::strin
     }
     // Add the last material if it has a name
     if (!currentMaterial.name.empty()) {
-        materials[currentMaterial.name] = currentMaterial;
+        MaterialHandle handle = MaterialHandle(currentMaterialIndex++);
+        materials[handle] = currentMaterial;
+        materialNameToHandle[currentMaterial.name] = handle;
     }
     
     file.close();
@@ -405,7 +408,9 @@ bool ModelLoader::parseMaterialLine(const std::string& line, Material& currentMa
         
         // Save previous material if it exists
         if (!currentMaterial.name.empty()) {
-            materials[currentMaterial.name] = currentMaterial;
+            MaterialHandle handle = MaterialHandle(currentMaterialIndex++);
+            materials[handle] = currentMaterial;
+            materialNameToHandle[currentMaterial.name] = handle;
         }
         
         // Initialize new material
@@ -491,17 +496,16 @@ void ModelLoader::updateTriangleMaterialPointers() {
     for (auto& triangle_ : triangles) {
         auto& triangle = triangle_.second;
         if (!triangle.materialName.empty()) {
-            auto it = materials.find(triangle.materialName);
-            if (it != materials.end()) {
-                triangle.material_ = &(it->second);
+            auto it = materialNameToHandle.find(triangle.materialName);
+            if (it != materialNameToHandle.end()) {
+                triangle.material = it->second;
             } else {
-                // Material not found, set to nullptr
-                triangle.material_ = nullptr;
+                triangle.material = MaterialHandle();
                 std::cerr << "Warning: Material '" << triangle.materialName << "' not found" << std::endl;
             }
         } else {
             // No material assigned
-            triangle.material_ = nullptr;
+            triangle.material = MaterialHandle();
         }
     }
 }

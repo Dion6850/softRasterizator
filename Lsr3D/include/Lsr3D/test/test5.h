@@ -21,7 +21,7 @@ void task() {
     int width, height;
     render::instance.getViewportSize(width, height);
     Camera m_camera(
-        Eigen::Vector3f(4.0f, 2.0f, 5.0f), // 相机位置
+        Eigen::Vector3f(4.0f, 2.0f, 3.0f), // 相机位置
         Eigen::Vector3f(0.0f, 0.0f, 0.0f), // 目标点
         Eigen::Vector3f(0.0f, 1.0f, 0.0f), // 上方向
         90.0f,                            // 视场角

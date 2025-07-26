@@ -10,7 +10,7 @@
  *
  */
 #include <GL/freeglut.h>
-#include <Lsr3D/test/test5.h>
+#include <Lsr3D/test/test6.h>
 #include <iostream>
 #include <iomanip>
 

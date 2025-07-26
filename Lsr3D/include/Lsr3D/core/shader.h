@@ -56,10 +56,10 @@ namespace lsr3d
      * @brief base class for fragment shader
      *
      */
-    class triangleFragmentShader : public Shader<fragementInputData, fragementOutputData> {
+    class triangleFragmentShader : public Shader<fragmentInputData, fragementOutputData> {
     public:
         triangleFragmentShader() :Shader("triangleFragmentShader") {}
-        virtual void shading(const fragementInputData& input, fragementOutputData& output) override;
+        virtual void shading(const fragmentInputData& input, fragementOutputData& output) override;
         bool isSupportEarlyZBuffer() const {
             return m_isSupportEarlyZBuffer; ///< Check if early Z-buffer is supported
         }

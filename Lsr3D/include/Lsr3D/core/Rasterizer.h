@@ -26,7 +26,8 @@ public:
     Rasterizer(int widht_, int height_, bool isEnableEarlyZBuffer_ = true);
     ~Rasterizer() = default;
     bool setFragmentShader(lsr3d::triangleFragmentShader shader);
-    void rasterization(const lsr3d::vertexOutputData& input, const lsr3d::ImageDatas& images);
+    void rasterization(const lsr3d::vertexOutputData& input, const lsr3d::ImageDatas& images, const lsr3d::DirectionalLightDatas& dirLights, const lsr3d::PointLightDatas& pointLights, const lsr3d::SpotLightDatas& spotLights);
+    
     void resize(int width_, int height_);
     void clearDepthBuffer();
     void enableEarlyZBuffer(bool enable = true);
@@ -41,17 +42,9 @@ private:
 
     lsr3d::triangleFragmentShader fragmentShader; ///< 片段着色器
 
-    lsr3d::TextureCoord interpolateUV(float w0, float w1, float w2, const lsr3d::vertexOutputData& input) const {
-        // 线性插值纹理坐标
-        return (input.triangle.t0 * w0 + input.triangle.t1 * w1 + input.triangle.t2 * w2);
-    }
-    lsr3d::Normal interpolateNormal(float w0, float w1, float w2, const lsr3d::vertexOutputData& input) const {
-        // 线性插值法线
-        return (input.triangle.n0 * w0 + input.triangle.n1 * w1 + input.triangle.n2 * w2).normalized();
-    }
-    lsr3d::Color interpolateColor(float w0, float w1, float w2, const lsr3d::vertexOutputData& input) const {
-        // 线性插值颜色
-        return (input.triangle.c0 * w0 + input.triangle.c1 * w1 + input.triangle.c2 * w2);
+    template<typename T>
+    T interpolate(float w0, float w1, float w2, const T& v0, const T& v1, const T& v2)const {
+        return (v0 * w0 + v1 * w1 + v2 * w2);
     }
 };
 

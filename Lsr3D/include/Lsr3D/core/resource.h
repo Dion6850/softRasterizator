@@ -13,34 +13,35 @@
 #define RESOURCE_H
 
 
-#include <Eigen/Core>
 #include <Lsr3D/core/handle.h>
+DEF_HANDLE(Vertex)DEF_HANDLE(TextureCoord)
+DEF_HANDLE(Triangle)DEF_HANDLE(Normal)
+DEF_HANDLE(Material)DEF_HANDLE(Image)
+DEF_HANDLE(Color)
+DEF_HANDLE(DirectionalLight)DEF_HANDLE(PointLight)
+DEF_HANDLE(SpotLight)
+#include <Eigen/Core>
+namespace lsr3d
+{
+    using NVec = Eigen::Vector3f; ///< normal vector type
+    using PVec = Eigen::Vector4f; ///< Position vector type
+    using SVec = Eigen::Vector2f; ///< Screen vector type
+}
+#include <Lsr3D/utils/utils.h>
+#include <vector>
 #include <unordered_map>
 #include <map>
-using lsr3d::Handle;
-using lsr3d::VertexHandle;
-using lsr3d::TextureCoordHandle;
-using lsr3d::TriangleHandle;
-using lsr3d::NormalHandle;
 
 namespace lsr3d
 {
     struct Vertex;struct TextureCoord;struct Normal;struct Color;
     struct Triangle;struct Material;struct TriangleData;struct Image;
-    using TriangleDatas = std::unordered_map<TriangleHandle, lsr3d::Triangle>;
-    using VertexDatas = std::unordered_map<VertexHandle, lsr3d::Vertex>;
-    using TextureCoordDatas = std::unordered_map<TextureCoordHandle, lsr3d::TextureCoord>;
-    using NormalDatas = std::unordered_map<NormalHandle, lsr3d::Normal>;
-    using ImageDatas = std::unordered_map<ImageHandle, lsr3d::Image>;
-    using MaterialDatas = std::unordered_map<MaterialHandle, lsr3d::Material>;
-    using ColorDatas = std::unordered_map<ColorHandle, lsr3d::Color>;
-    using NVec = Eigen::Vector4f; ///< normal vector type
     struct Vertex {
-        NVec position; ///< 4D position vector (x, y, z, 1)
+        PVec position; ///< 4D position vector (x, y, z, 1)
         Vertex(float x = 0.0f, float y = 0.0f, float z = 0.0f)
             : position(x, y, z, 1.0f) {
         } ///< Constructor with optional coordinates
-        Vertex(NVec pos)
+        Vertex(PVec pos)
             : position(std::move(pos)) {
         } ///< Constructor with Eigen::Vector4f
         operator Eigen::Vector4f () const {
@@ -92,7 +93,7 @@ namespace lsr3d
         } ///< Add two texture coordinates
         TextureCoord operator- (const TextureCoord& other) const {
             return TextureCoord(uv - other.uv);
-        } ///< Subtract two texture coordinates
+        } ///< Subtract two texture co_ordinates
         TextureCoord operator/ (float scalar) const {
             if (scalar == 0.0f) {
                 throw std::runtime_error("Division by zero in TextureCoord division");
@@ -104,12 +105,12 @@ namespace lsr3d
     struct Normal {
         NVec normal; ///< 4D normal vector (x, y, z, 1)
         Normal(float x = 0.0f, float y = 0.0f, float z = 0.0f)
-            : normal(x, y, z, 1.0f) {
+            : normal(x, y, z) {
         } ///< Constructor with optional coordinates
         Normal(NVec normal_)
             : normal(std::move(normal_)) {
         } ///< Constructor with Eigen::Vector4f
-        operator Eigen::Vector4f() const {
+        operator Eigen::Vector3f() const {
             return normal; ///< Implicit conversion to Eigen::Vector4f
         }
         Normal operator*(float scalar) const {
@@ -136,9 +137,12 @@ namespace lsr3d
 
     struct Color {
         Eigen::Vector4f color; ///< RGBA color vector (r, g, b, a)
-        Color(float r = 255.0f, float g = 255.0f, float b = 255.0f, float a = 255.0f)
-            : color(r, g, b, a) {
+        Color(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 255.0f)
+            : color(lsr3d::clamp(r,0.0f, 255.0f), lsr3d::clamp(g,0.0f, 255.0f), lsr3d::clamp(b,0.0f,255.0f),lsr3d::clamp(a,0.0f,255.0f)){
         } ///< Constructor with optional RGBA values
+        Color(Eigen::Vector3f rgb, float a)
+            : color(rgb[0], rgb[1], rgb[2], lsr3d::clamp(a, 0.0f, 255.0f)) {
+        } ///< Constructor with RGB values and optional alpha
         Color(Eigen::Vector4f color_)
             : color(std::move(color_)) {
         } ///< Constructor with Eigen::Vector4f
@@ -149,20 +153,36 @@ namespace lsr3d
         float g() const { return color[1]; } ///< Get green component
         float b() const { return color[2]; } ///< Get blue component
         float a() const { return color[3]; } ///< Get alpha component
+        Eigen::Vector3f rgb() const {
+            return Eigen::Vector3f(color[0], color[1], color[2]); ///< Get RGB components as Eigen::Vector3f
+        }
         Color operator+(const Color& other) const {
-            return Color(color + other.color);
+            return Color(rgb() + other.rgb(), lsr3d::max(a(), other.a()));
         }
         Color operator-(const Color& other) const {
-            return Color(color - other.color);
+            return Color(rgb() - other.rgb(), lsr3d::max(a(), other.a()));
         }
+        Color operator*(float scalar) const{
+            return Color(rgb() * scalar, a());
+        }
+        /**
+         * @brief cwiseProduct is not a color need operation
+         * 
+         * @param other 
+         * @return Color 
+         * @warning Dont care about alpha channel in this operation
+         */
         Color operator*(const Color& other) const {
             return Color(color.cwiseProduct(other.color));
-        }
+        } ///< Multiply color components element-wise
         Color operator/(float scalar) const {
             if (scalar == 0.0f) {
                 throw std::runtime_error("Division by zero in Color division");
             }
-            return Color(color / scalar);
+            return Color(rgb() / scalar, a());
+        }
+        void operator+=(const Color& other){
+            this->color += other.color;
         }
     };
 
@@ -258,10 +278,10 @@ namespace lsr3d
                 (1 - fx) * fy,          // b
                 fx * fy                 // a
             );
-            return c00 * factor +
-                c01 * factor +
-                c10 * factor +
-                c11 * factor;
+            return (c00 * factor) +
+                (c01 * factor) +
+                (c10 * factor) +
+                (c11 * factor);
         }
     private:
         inline unsigned char getR(int x, int y) const {
@@ -333,6 +353,12 @@ namespace lsr3d
         TextureCoord t0, t1, t2;             ///< Texture coordinates (if available
         Color c0, c1, c2;                    ///< Vertex colors (if available)
         Normal n0, n1, n2;                   ///< Vertex normals (if available)
+        /**
+         * @brief screen space positions
+         * @warning can not get by Triangle.getRawData() function
+         * @details This is used for rasterization and shading calculations
+         */
+        SVec s0, s1, s2;                    ///< Screen space positions (if available)
         bool hasTextures;                     ///< Whether texture coordinates are available
         bool hasNormals;                      ///< Whether vertex normals are available
         std::string materialName;             ///< Name of the material used by this triangle
@@ -424,7 +450,8 @@ namespace lsr3d
      */
     struct vertexInputData {
         lsr3d::TriangleData triangle;
-        Eigen::Matrix4f MVP;
+        Eigen::Matrix4f M;
+        Eigen::Matrix4f VP;
         int width, height; ///< Viewport size for screen space conversion
     };
     /**
@@ -433,6 +460,7 @@ namespace lsr3d
      */
     struct vertexOutputData {
         lsr3d::TriangleData triangle;
+        lsr3d::SVec screenPosition; ///< Screen space position (x, y, z)
         bool discard = false;
     };
 
@@ -440,10 +468,11 @@ namespace lsr3d
      * @brief Fragment input data structure for the fragment shader
      * @warning Can not be empty parameter create
      */
-    struct fragementInputData {
+    struct fragmentInputData {
 
         /* vertex shader output data */
-        lsr3d::Uv position;
+        lsr3d::PVec position;
+        lsr3d::Uv screenSpacePosition;
         lsr3d::TextureCoord textureCoord;
         lsr3d::Normal normal;
         lsr3d::Color color;
@@ -453,6 +482,9 @@ namespace lsr3d
         const lsr3d::ImageDatas& images; ///< Image handle for texture sampling
 
         /* TODO: light info */
+        const DirectionalLightDatas& dirLights;
+        const SpotLightDatas& spotLights;
+        const PointLightDatas& pointLights;
 
     };
     struct fragementOutputData {
@@ -461,4 +493,68 @@ namespace lsr3d
         // float depth; ///< Depth value for depth testing
     };
 } // namespace std
+
+
+/**
+ * @brief light source classes
+ */
+namespace lsr3d
+{
+    /**
+     * @brief Light source information
+     */
+    struct Light {
+        Eigen::Vector4f position; ///< Light position in world coordinates (x, y, z, w)
+        Eigen::Vector4f color;    ///< Light color (r, g, b, a)
+        float intensity = 1.0f;   ///< Light intensity
+
+        Light(const Eigen::Vector4f& pos = Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f),
+              const Eigen::Vector4f& col = Eigen::Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
+              float inten = 1.0f)
+            : position(pos), color(col), intensity(inten) {}
+    };
+    /**
+     * @brief Point Light source
+     * @warning Can not generate shadow
+     */
+    struct PointLight final: public Light {
+        PointLight(const Eigen::Vector4f& pos = Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f),
+                   const Eigen::Vector4f& col = Eigen::Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
+                   float inten = 1.0f)
+            : Light(pos, col, inten) {}
+    };
+    
+    /**
+     * @brief Directional Light source
+     * @note There is more dirction than point light
+     */
+    struct DirectionalLight final: public Light {
+        bool enabledShadow = false; ///< Whether shadow is enabled for this light
+        Eigen::Vector4f direction; ///< Direction of the light (normalized)
+        DirectionalLight(const Eigen::Vector4f& dir = Eigen::Vector4f(0.0f, 0.0f, -1.0f, 0.0f),
+                        const Eigen::Vector4f& pos = Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f),
+                        const Eigen::Vector4f& col = Eigen::Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
+                        float inten = 1.0f, bool shadow = false)
+            : Light(pos, col, inten), enabledShadow(shadow), direction(dir.normalized()) {}
+        void enableShadow(bool enable) {
+            enabledShadow = enable; ///< Enable or disable shadow for this light
+        }
+    };
+    /**
+     * @brief spot light source
+     * @note there is more cutoffAngle than directional light
+     */
+    struct SpotLight final: public Light {
+        Eigen::Vector4f direction; ///< Direction of the light (normalized)
+        float cutoffAngle = 45.0f; ///< Cutoff angle in degrees
+        bool enabledShadow = false; ///< Whether shadow is enabled for this light
+        SpotLight(const Eigen::Vector4f& pos = Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f),
+                  const Eigen::Vector4f& dir = Eigen::Vector4f(0.0f, 0.0f, -1.0f, 0.0f),
+                  const Eigen::Vector4f& col = Eigen::Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
+                  float inten = 1.0f,
+                   float cutoff = 45.0f,
+                   bool shadow = false)
+            : Light(pos,col, inten), cutoffAngle(cutoff), direction(dir.normalized()), enabledShadow(shadow) {}
+    };
+}
 #endif //RESOURCE_H

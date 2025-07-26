@@ -17,30 +17,30 @@ namespace lsr3d {
             depthBuffer.resize(height, std::vector<float>(width, std::numeric_limits<float>::max()));
         }
     } ///< Constructor initializes the rasterizer with specified width and height
-    void Rasterizer::rasterization(const lsr3d::vertexOutputData& input, const lsr3d::ImageDatas& images) {
-        if(input.discard) {
+    void Rasterizer::rasterization(const lsr3d::vertexOutputData& input, const lsr3d::ImageDatas& images,
+        const lsr3d::DirectionalLightDatas& dirLights, const lsr3d::PointLightDatas& pointLights, const lsr3d::SpotLightDatas& spotLights) {
+        if (input.discard) {
             return; // Skip rasterization if the triangle is discarded
         }
+        lsr3d::SVec v0_screen = input.triangle.s0;
+        lsr3d::SVec v1_screen = input.triangle.s1;
+        lsr3d::SVec v2_screen = input.triangle.s2;
         // bundding box
-        int minx = std::min({input.triangle.v0.position.x(), input.triangle.v1.position.x(), input.triangle.v2.position.x()});
-        int miny = std::min({input.triangle.v0.position.y(), input.triangle.v1.position.y(), input.triangle.v2.position.y()});
-        int maxx = std::max({input.triangle.v0.position.x(), input.triangle.v1.position.x(), input.triangle.v2.position.x()});
-        int maxy = std::max({input.triangle.v0.position.y(), input.triangle.v1.position.y(), input.triangle.v2.position.y()});
+        int minx = std::min({v0_screen.x(), v1_screen.x(), v2_screen.x()});
+        int miny = std::min({v0_screen.y(), v1_screen.y(), v2_screen.y()});
+        int maxx = std::max({v0_screen.x(), v1_screen.x(), v2_screen.x()});
+        int maxy = std::max({v0_screen.y(), v1_screen.y(), v2_screen.y()});
         // Clamp bounding box to image dimensions
         minx = std::max(minx, 0);
         miny = std::max(miny, 0);
         maxx = std::min(maxx, width - 1);
         maxy = std::min(maxy, height - 1);
-        Eigen::Vector2f v0_screen = input.triangle.v0.position.head<2>();
-        Eigen::Vector2f v1_screen = input.triangle.v1.position.head<2>();
-        Eigen::Vector2f v2_screen = input.triangle.v2.position.head<2>();
-
 
         // Rasterize the triangle within the bounding box
         for (int y = miny; y <= maxy; ++y) {
             for (int x = minx; x <= maxx; ++x) {
                 // Perform edge function tests and depth tests here
-                Eigen::Vector2f p(x + 0.5f, y + 0.5f); // Center of pixel
+                lsr3d::SVec p(x + 0.5f, y + 0.5f); // Center of pixel
                 float area = cross2F(v1_screen - v0_screen, v2_screen - v0_screen);
                 if(isEnableBackFaceCulling && area >= 0) {
                     continue; // Backface culling: skip this pixel
@@ -59,14 +59,21 @@ namespace lsr3d {
                     }
                     depthBuffer[y][x] = z; // Update depth buffer
                 }
-                
-                lsr3d::fragementInputData fragmentInput{
-                    .position = p,
-                    .textureCoord = interpolateUV(w0, w1, w2, input),
-                    .normal = interpolateNormal(w0, w1, w2, input),
-                    .color = interpolateColor(w0, w1, w2, input),
+                // cal normal
+                Eigen::Vector3f edge1 = (input.triangle.v1.position - input.triangle.v0.position).head<3>();
+                Eigen::Vector3f edge2 = (input.triangle.v2.position - input.triangle.v0.position).head<3>();
+                lsr3d::NVec n = edge1.cross(edge2).normalized();
+                lsr3d::fragmentInputData fragmentInput{
+                    .position = interpolate(w0, w1, w2, input.triangle.v0, input.triangle.v1, input.triangle.v2),
+                    .screenSpacePosition = p,
+                    .textureCoord = interpolate(w0, w1, w2, input.triangle.t0, input.triangle.t1, input.triangle.t2),
+                    .normal = n,
+                    .color = interpolate(w0, w1, w2, input.triangle.c0,input.triangle.c1,input.triangle.c2),
                     .material = input.triangle.material,
-                    .images = images
+                    .images = images,
+                    .dirLights = dirLights,
+                    .spotLights = spotLights,
+                    .pointLights = pointLights,
                 };
                 lsr3d::fragementOutputData fragmentOutput;
                 fragmentShader.shading(fragmentInput, fragmentOutput);

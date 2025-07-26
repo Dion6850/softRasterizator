@@ -13,34 +13,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Lsr3D/utils/MVP.h>
-#include <Lsr3D/core/resource.h>
-namespace lsr3d
-{
-    /**
-     * @brief Set Pixel Color
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param color color vector (255,255,255)
-     * @details The coordinate system takes the top-left corner of the screen as the origin, with x going right and y going down.
-     * @warning Must be wrapped in glBegin(GL_POINTS) and glEnd().
-     */
-    inline void SetPixel(const int& x, const int& y, const Eigen::Vector3d& color) {
-        glColor3f(color.x(), color.y(), color.z());
-        glVertex2i(x, y);
-    }
-    inline void SetPixel(const int& x, const int& y, const lsr3d::Color& color) {
-        glColor3f(color.r(), color.g(), color.b());
-        glVertex2i(x, y);
-    }
-
-    inline int cross(Eigen::Vector2i a, Eigen::Vector2i b) {
-        return a.x() * b.y() - a.y() * b.x();
-    }
-    inline float cross2F(Eigen::Vector2f a, Eigen::Vector2f b) {
-        return a.x() * b.y() - a.y() * b.x();
-    }
-
-}
+#include <Lsr3D/utils/math_utils.h>
 namespace utils
 {
     /**
@@ -102,5 +75,26 @@ namespace utils
     /// <param name="endy"></param>
     void BRESENHAM_Line(GLint startx, GLint starty, GLint endx, GLint endy);
 
+}
+#include <Lsr3D/core/resource.h>
+namespace lsr3d
+{
+    /**
+     * @brief namespace lsr3d
+     * @warning There is something related to lsr3d, so include this file after lsr3d/core/resource.h
+     */
+
+    /**
+     * @brief Set Pixel Color
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param color color vector (255,255,255)
+     * @details The coordinate system takes the top-left corner of the screen as the origin, with x going right and y going down.
+     * @warning Must be wrapped in glBegin(GL_POINTS) and glEnd().
+     */
+    void SetPixel(const int& x, const int& y, const Eigen::Vector3d& color);
+    void SetPixel(const int& x, const int& y, const lsr3d::Color& color);
+    int cross(Eigen::Vector2i a, Eigen::Vector2i b);
+    float cross2F(Eigen::Vector2f a, Eigen::Vector2f b);
 }
 

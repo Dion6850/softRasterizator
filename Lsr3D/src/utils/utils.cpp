@@ -10,6 +10,7 @@
  */
 
 #include <Lsr3D/utils/utils.h>
+#include <Lsr3D/core/resource.h>
 void utils::DDA_Line(GLint startx, GLint starty, GLint endx, GLint endy)
 {
     glBegin(GL_POINTS);
@@ -308,4 +309,18 @@ void utils::BRESENHAM_Line(GLint startx, GLint starty, GLint endx, GLint endy)
     }
     glFlush();
     glEnd();
+}
+void lsr3d::SetPixel(const int& x, const int& y, const lsr3d::Color& color) {
+    glColor3f(color.r(), color.g(), color.b());
+    glVertex2i(x, y);
+}
+void lsr3d::SetPixel(const int& x, const int& y, const Eigen::Vector3d& color) {
+    glColor3f(color.x(), color.y(), color.z());
+    glVertex2i(x, y);
+}
+int lsr3d::cross(Eigen::Vector2i a, Eigen::Vector2i b) {
+    return a.x() * b.y() - a.y() * b.x();
+}
+float lsr3d::cross2F(Eigen::Vector2f a, Eigen::Vector2f b) {
+    return a.x() * b.y() - a.y() * b.x();
 }

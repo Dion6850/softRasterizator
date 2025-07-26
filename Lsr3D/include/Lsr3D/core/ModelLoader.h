@@ -15,7 +15,8 @@
 #include <Lsr3D/core/resource.h>
 #include <Lsr3D/core/ImageLoader.h>
 using namespace lsr3d;
-
+namespace lsr3d { class ModelLoader; }
+DEF_HANDLE(ModelLoader)
 namespace lsr3d
 {
     /**

@@ -4,14 +4,37 @@
  * @brief copy from https://github.com/iGame-Lab/iGameView.git
  * @version 0.1
  * @date 2025-07-19
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #pragma once
 #include <iostream>
+#include <unordered_map>
 
-namespace lsr3d {
+ /**
+  * @brief define <name>Handle class and <name>Datas type and hash<<name>Handle> function
+  *
+ */
+#define DEF_HANDLE(name) \
+	namespace lsr3d { \
+		class name; \
+		class name##Handle : public lsr3d::Handle { \
+		public: \
+			explicit name##Handle(int _idx = -1) : lsr3d::Handle(_idx) {} \
+		}; \
+		using name##Datas = std::unordered_map<name##Handle, lsr3d::name>; \
+	} /*namespace lsr3d*/ \
+	namespace std { \
+		template<> \
+		struct hash<lsr3d::name##Handle> { \
+			size_t operator()(const lsr3d::name##Handle& h) const { \
+				return std::hash<int>()(h.idx()); \
+			} \
+		};\
+	} /*namespace std*/
+namespace lsr3d
+{
 	class Handle {
 	public:
 		// 显式构造，不允许 "iGameHandle h = 1;" 的语法进行隐式转换
@@ -56,86 +79,7 @@ namespace lsr3d {
 	private:
 		int idx_;
 	};
-
-	//显式构造能够避免其他类型的handle赋值给当前类型的handle
-	class VertexHandle : public Handle { public: explicit VertexHandle(int _idx = -1) : Handle(_idx) {} };
-	class TextureCoordHandle : public Handle { public: explicit TextureCoordHandle(int _idx = -1) : Handle(_idx) {} };
-	class TriangleHandle : public Handle { public: explicit TriangleHandle(int _idx = -1) : Handle(_idx) {} };
-	class NormalHandle : public Handle { public: explicit NormalHandle(int _idx = -1) : Handle(_idx) {} };
-	class MaterialHandle : public Handle { public: explicit MaterialHandle(int _idx = -1) : Handle(_idx) {} };
-	class ImageHandle : public Handle { public: explicit ImageHandle(int _idx = -1) : Handle(_idx) {} };
-	class ColorHandle : public Handle { public: explicit ColorHandle(int _idx = -1) : Handle(_idx) {} };
-	class ModelHandle : public Handle { public: explicit ModelHandle(int _idx = -1) : Handle(_idx) {} };
-}
-
-/*======================特化各种iGameHandle的哈希映射============================*/
-namespace std
-{
-	template<>
-	struct hash<lsr3d::VertexHandle>
-	{
-		size_t operator()(const lsr3d::VertexHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::TextureCoordHandle>
-	{
-		size_t operator()(const lsr3d::TextureCoordHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::TriangleHandle>
-	{
-		size_t operator()(const lsr3d::TriangleHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::NormalHandle>
-	{
-		size_t operator()(const lsr3d::NormalHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::MaterialHandle>
-	{
-		size_t operator()(const lsr3d::MaterialHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::ImageHandle>
-	{
-		size_t operator()(const lsr3d::ImageHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::ColorHandle>
-	{
-		size_t operator()(const lsr3d::ColorHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-	template<>
-	struct hash<lsr3d::ModelHandle>
-	{
-		size_t operator()(const lsr3d::ModelHandle& h)const
-		{
-			return hash<int>()(h.idx());
-		}
-	};
-}
+} // namespace lsr3d
 
 
 

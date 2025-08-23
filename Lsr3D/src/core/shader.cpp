@@ -97,15 +97,22 @@ void lsr3d::triangleFragmentShader::shading(const fragmentInputData& input, frag
     /* TODO : cal lighting*/
     // dir light
     for (const auto& light : input.dirLights) {
-        // TODO: check PCF
+        lightingColor += lsr3d::CalDirectLight(n0, light.second.direction.head<3>().normalized(), light.second.color) * light.second.intensity;
     }
     // spot light
     for (const auto& light : input.spotLights) {
-
+        // 计算光线方向
+        Eigen::Vector3f lightDir = (position - light.second.position).head<3>().normalized();
+        // 计算光线与聚光灯的角度
+        float cos = std::cos(light.second.cutoffAngle);
+        if (lightDir.dot(light.second.direction.head<3>().normalized()) < cos) {
+            continue;
+        }
+        lightingColor += lsr3d::CalDirectLight(n0.normal, lightDir, light.second.color) * light.second.intensity;
     }
     // point light
     for (const auto& light : input.pointLights) {
-        lightingColor += lsr3d::CalDirectLight(n0, (position - light.second.position).head<3>().normalized(), light.second.color) * light.second.intensity;
+        lightingColor += lsr3d::CalDirectLight(n0.normal, (position - light.second.position).head<3>().normalized(), light.second.color) * light.second.intensity;
     }
     if (material.isValid()) {
         // 使用材质进行环境光照

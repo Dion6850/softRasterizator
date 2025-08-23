@@ -67,6 +67,18 @@ void Init(int width, int height) {
         )
     );
 
+    // create test directional light
+
+    // create test spot light
+    SpotLightHandle spotLightHandle = render::instance.createSpotLight(
+        SpotLight(
+            Eigen::Vector4f(0.0f, 0.0f, -1.0f, 1.0f), // 光源位置
+            Eigen::Vector4f(0.0f, 0.0f, 1.0f, 0.0f), // 光源方向
+            Eigen::Vector4f(1.0f, 0.0f, 0.0f, 1.0f), // 光源颜色
+            15.0f, // 聚光灯角度
+            0.5f   // 光源强度
+        )
+    );
     // create test point light
     PointLightHandle pointLightHandle = render::instance.createPointLight(
         PointLight(

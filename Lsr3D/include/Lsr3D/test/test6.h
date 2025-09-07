@@ -32,26 +32,6 @@ void task() {
     );
     render::instance.renderScene(m_camera);
 }
-/**
- * @brief rendering loop
- *
- */
-inline void Display() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    render::instance.clearDepthBuffer(); // 每帧清空深度缓冲区
-    glBegin(GL_POINTS);
-    /*
-    ################## just can draw points ##################
-    */
-
-    task();
-
-    /*
-    ################## just can draw points ##################
-    */
-    glEnd();
-    glFlush();
-}
 
 void Init(int width, int height) {
 

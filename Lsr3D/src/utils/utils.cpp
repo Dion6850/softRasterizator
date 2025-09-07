@@ -204,8 +204,6 @@ void utils::TMP_Line(GLint startx, GLint starty, GLint endx, GLint endy)
     glFlush();
     glEnd();
 }
-
-
 void utils::BRESENHAM_Line(GLint startx, GLint starty, GLint endx, GLint endy)
 {
     glBegin(GL_POINTS);
@@ -311,12 +309,16 @@ void utils::BRESENHAM_Line(GLint startx, GLint starty, GLint endx, GLint endy)
     glEnd();
 }
 void lsr3d::SetPixel(const int& x, const int& y, const lsr3d::Color& color) {
-    glColor3f(color.r(), color.g(), color.b());
-    glVertex2i(x, y);
+    if (x < 0 || x >= initialWidth || y < 0 || y >= initialHeight) return;
+    defaultBuffer.setData(x, y, 0, static_cast<unsigned char>(255.0 * std::max(0.0f, std::min(1.0f, color.r()))));
+    defaultBuffer.setData(x, y, 1, static_cast<unsigned char>(255.0 * std::max(0.0f, std::min(1.0f, color.g()))));
+    defaultBuffer.setData(x, y, 2, static_cast<unsigned char>(255.0 * std::max(0.0f, std::min(1.0f, color.b()))));
 }
 void lsr3d::SetPixel(const int& x, const int& y, const Eigen::Vector3d& color) {
-    glColor3f(color.x(), color.y(), color.z());
-    glVertex2i(x, y);
+    if (x < 0 || x >= initialWidth || y < 0 || y >= initialHeight) return;
+    defaultBuffer.setData(x, y, 0, static_cast<unsigned char>(255.0 * std::max(0.0, std::min(1.0, color.x()))));
+    defaultBuffer.setData(x, y, 1, static_cast<unsigned char>(255.0 * std::max(0.0, std::min(1.0, color.y()))));
+    defaultBuffer.setData(x, y, 2, static_cast<unsigned char>(255.0 * std::max(0.0, std::min(1.0, color.z()))));
 }
 int lsr3d::cross(Eigen::Vector2i a, Eigen::Vector2i b) {
     return a.x() * b.y() - a.y() * b.x();

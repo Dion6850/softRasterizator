@@ -11,6 +11,7 @@
  */
 #include <GL/freeglut.h>
 #include <Lsr3D/test/test6.h>
+#include <Lsr3D/core/buffer.h>
 #include <iostream>
 #include <iomanip>
 
@@ -22,9 +23,11 @@ static float fps = 0.0f;
 static float frameTime = 0.0f;
 
 // 定义初始窗口大小
-const int initialWidth = 1024;
-const int initialHeight = 1024;
+int initialWidth = 1024;
+int initialHeight = 1024;
 
+// define default buffer
+FrameBuffer defaultBuffer(initialWidth, initialHeight);
 // 定义静态员变量
 lsr3d::Renderer lsr3d::Renderer::instance(initialWidth, initialHeight);
 
@@ -34,10 +37,35 @@ void calculateFrameTime();
 void displayFrameTime();
 /**
  * @brief init draw such as model load
- *
+ * @note defined from test.h
  */
 void Init(int width, int height);
-void Display();
+/**
+ * @brief cal rendering
+ * @note defined from test.h
+ */
+void task();
+/**
+ * @brief rendering loop
+ *
+ */
+inline void Display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    render::instance.clearDepthBuffer(); // 每帧清空深度缓冲区
+    /*
+    ################## just can draw points ##################
+    */
+
+    task();
+
+    /*
+    ################## just can draw points ##################
+    */
+    int width, height;
+    render::instance.getViewportSize(width, height);
+    glDrawPixels(width, height, GL_RGB, GL_UNSIGNED_BYTE, defaultBuffer.getData());
+    glutSwapBuffers();
+}
 
 /**
  * @brief 计算帧时间和FPS
@@ -94,7 +122,17 @@ int main(int argc, char** argv) {
     glutReshapeFunc(ResizeWindow);
     glutDisplayFunc(Display);
     glutIdleFunc(idleCallback); // 设置空闲回调
-    
+    glutKeyboardFunc([](unsigned char key, int x, int y) {
+        // 按下ESC键退出
+        if (key == 27 || key == 'q' || key == 'Q') { 
+            render::instance.shutdown();
+            exit(0);
+        }
+        else if(key == 's' || key == 'S') {
+            defaultBuffer.saveToFile("output.ppm", FrameBuffer::SaveFormat::SAVE_FORMAT_PPM);
+            std::cout << "Frame buffer saved to output.ppm" << std::endl;
+        }
+    });
     // 初始化计时器
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     
@@ -127,9 +165,15 @@ void initializeOpenGL(int argc, char** argv) {
  * @param height
  */
 void ResizeWindow(int width, int height) {
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, height, 0, -1, 1);
-    lsr3d::Renderer::instance.resize(width, height);
+    if(width > 0 && height > 0) {
+        glViewport(0, 0, width, height);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, width, height, 0, -1, 1);
+        // resize defaultBuffer
+        defaultBuffer.resize(width, height);
+        initialWidth = width;
+        initialHeight = height;
+        lsr3d::Renderer::instance.resize(width, height);
+    }
 }

@@ -10,7 +10,7 @@
  */
 
 #include <lsr3d/core/render.h>
-
+#include <omp.h>
 
 namespace lsr3d
 {

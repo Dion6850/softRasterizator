@@ -479,12 +479,12 @@ namespace lsr3d
         lsr3d::Material material;
 
         /* other input */
-        const lsr3d::ImageDatas& images; ///< Image handle for texture sampling
+        const lsr3d::ImageDatas* images; ///< Image handle for texture sampling
 
         /* TODO: light info */
-        const DirectionalLightDatas& dirLights;
-        const SpotLightDatas& spotLights;
-        const PointLightDatas& pointLights;
+        const DirectionalLightDatas* dirLights;
+        const SpotLightDatas* spotLights;
+        const PointLightDatas* pointLights;
 
     };
     struct fragementOutputData {

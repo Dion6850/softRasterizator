@@ -60,22 +60,11 @@ public:
    inline int getOffset(int x, int y, int channel) const {
         return ((height - y - 1)*width + x) * channels + channel;
    }
-   /**
-    * @note safe access with bounds check
-    */
    T& operator()(int x, int y, int channel) {
-        if(checkOutOfBounds(x, y, channel)) { throw std::out_of_range("Index out of bounds");}
         return this->operator[](getOffset(x, y, channel));
     }
-   /**
-    * @note safe access with bounds check
-     */
-    virtual void setData(int x, int y, int channel, const T& value) {
-       try {
-            this->operator()(x, y, channel) = value;
-       }catch(...){
-           throw std::out_of_range("Index out of bounds");
-       }
+    virtual inline void setData(int x, int y, int channel, const T& value) {
+        this->operator()(x, y, channel) = value;
    }
 
    T* getData() { return data; };

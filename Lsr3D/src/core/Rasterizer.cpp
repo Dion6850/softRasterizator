@@ -10,7 +10,7 @@
  */
 
 #include <Lsr3D/core/Rasterizer.h>
-
+#include <omp.h>
 namespace lsr3d {
     Rasterizer::Rasterizer(int width_, int height_, bool isEnableEarlyZBuffer_) : width(width_), height(height_), isEnableEarlyZBuffer(isEnableEarlyZBuffer_) {
         if (isEnableEarlyZBuffer) {
@@ -36,48 +36,54 @@ namespace lsr3d {
         maxx = std::min(maxx, width - 1);
         maxy = std::min(maxy, height - 1);
 
+        float area = cross2F(v1_screen - v0_screen, v2_screen - v1_screen);
+        if(isEnableBackFaceCulling && area >= 0) {
+            return; // Backface culling: skip this triangle
+        }
+        // cal normal
+        Eigen::Vector3f edge1 = (input.triangle.v1.position - input.triangle.v0.position).head<3>();
+        Eigen::Vector3f edge2 = (input.triangle.v2.position - input.triangle.v0.position).head<3>();
+        lsr3d::NVec n = edge1.cross(edge2).normalized();
         // Rasterize the triangle within the bounding box
+        // #pragma omp parallel for schedule(dynamic, 16)
         for (int y = miny; y <= maxy; ++y) {
             for (int x = minx; x <= maxx; ++x) {
-                // Perform edge function tests and depth tests here
-                lsr3d::SVec p(x + 0.5f, y + 0.5f); // Center of pixel
-                float area = cross2F(v1_screen - v0_screen, v2_screen - v0_screen);
-                if(isEnableBackFaceCulling && area >= 0) {
-                    continue; // Backface culling: skip this pixel
+            // Perform edge function tests and depth tests here
+            lsr3d::SVec p(x + 0.5f, y + 0.5f); // Center of pixel
+            float w0 = cross2F(v1_screen - p, v2_screen - p) / area;
+            float w1 = cross2F(v2_screen - p, v0_screen - p) / area;
+            float w2 = cross2F(v0_screen - p, v1_screen - p) / area;
+            if (w0 < 0 || w1 < 0 || w2 < 0) {
+                continue; // Pixel is outside the triangle
+            }
+            float z = w0 * input.triangle.v0.position.z() + w1 * input.triangle.v1.position.z() + w2 * input.triangle.v2.position.z();
+            /* early-z test */
+            if (isEnableEarlyZBuffer) {
+                // Early Z-buffer test (height, width)
+                if (depthBuffer[y][x] >= z) {
+                    continue; // Skip pixel if depth test fails
                 }
-                float w0 = cross2F(v1_screen - p, v2_screen - p) / area;
-                float w1 = cross2F(v2_screen - p, v0_screen - p) / area;
-                float w2 = cross2F(v0_screen - p, v1_screen - p) / area;
-                if (w0 < 0 || w1 < 0 || w2 < 0) {
-                    continue; // Pixel is outside the triangle
-                }
-                float z = w0 * input.triangle.v0.position.z() + w1 * input.triangle.v1.position.z() + w2 * input.triangle.v2.position.z();
-                if (isEnableEarlyZBuffer) {
-                    // Early Z-buffer test (height, width)
-                    if (depthBuffer[y][x] >= z) {
-                        continue; // Skip pixel if depth test fails
-                    }
-                    depthBuffer[y][x] = z; // Update depth buffer
-                }
-                // cal normal
-                Eigen::Vector3f edge1 = (input.triangle.v1.position - input.triangle.v0.position).head<3>();
-                Eigen::Vector3f edge2 = (input.triangle.v2.position - input.triangle.v0.position).head<3>();
-                lsr3d::NVec n = edge1.cross(edge2).normalized();
-                lsr3d::fragmentInputData fragmentInput{
-                    .position = interpolate(w0, w1, w2, input.triangle.v0, input.triangle.v1, input.triangle.v2),
-                    .screenSpacePosition = p,
-                    .textureCoord = interpolate(w0, w1, w2, input.triangle.t0, input.triangle.t1, input.triangle.t2),
-                    .normal = n,
-                    .color = interpolate(w0, w1, w2, input.triangle.c0,input.triangle.c1,input.triangle.c2),
-                    .material = input.triangle.material,
-                    .images = images,
-                    .dirLights = dirLights,
-                    .spotLights = spotLights,
-                    .pointLights = pointLights,
-                };
-                lsr3d::fragementOutputData fragmentOutput;
-                fragmentShader.shading(fragmentInput, fragmentOutput);
-                SetPixel(x, y, fragmentOutput.color);
+            }
+            lsr3d::fragmentInputData fragmentInput{
+                .position = interpolate(w0, w1, w2, input.triangle.v0, input.triangle.v1, input.triangle.v2),
+                .screenSpacePosition = p,
+                .textureCoord = interpolate(w0, w1, w2, input.triangle.t0, input.triangle.t1, input.triangle.t2),
+                .normal = n,
+                .color = interpolate(w0, w1, w2, input.triangle.c0,input.triangle.c1,input.triangle.c2),
+                .material = input.triangle.material,
+                .images = &images,
+                .dirLights = &dirLights,
+                .spotLights = &spotLights,
+                .pointLights = &pointLights,
+            };
+            lsr3d::fragementOutputData fragmentOutput;
+            fragmentShader.shading(fragmentInput, fragmentOutput);
+            /* depth test */
+            if (depthBuffer[y][x] >= z) {
+                continue; // Skip pixel if depth test fails
+            }
+            depthBuffer[y][x] = z; // Update depth buffer
+            SetPixel(x, y, fragmentOutput.color);
             }
         }
     }

@@ -14,6 +14,7 @@
 #include <Lsr3D/core/buffer.h>
 #include <iostream>
 #include <iomanip>
+#include <omp.h>
 
 
 // 帧时间统计变量
@@ -157,6 +158,9 @@ void initializeOpenGL(int argc, char** argv) {
     glLoadIdentity();
     glOrtho(0, initialWidth, initialHeight, 0, -1, 1);
     Init(initialWidth, initialHeight);
+    int num_procs = omp_get_num_procs();
+    omp_set_num_threads(num_procs);
+    printf("[OMP]Using %d threads for rendering.\n", num_procs);
 }
 /**
  * @brief Call back for window resize

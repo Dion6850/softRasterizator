@@ -308,6 +308,8 @@ void utils::BRESENHAM_Line(GLint startx, GLint starty, GLint endx, GLint endy)
     glFlush();
     glEnd();
 }
+
+
 void lsr3d::SetPixel(const int& x, const int& y, const lsr3d::Color& color) {
     if (x < 0 || x >= initialWidth || y < 0 || y >= initialHeight) return;
     defaultBuffer.setData(x, y, 0, static_cast<unsigned char>(255.0 * std::max(0.0f, std::min(1.0f, color.r()))));

@@ -96,11 +96,11 @@ void lsr3d::triangleFragmentShader::shading(const fragmentInputData& input, frag
     lsr3d::Color materialColor;
     /* TODO : cal lighting*/
     // dir light
-    for (const auto& light : input.dirLights) {
+    for (const auto& light : *(input.dirLights)) {
         lightingColor += lsr3d::CalDirectLight(n0, light.second.direction.head<3>().normalized(), light.second.color) * light.second.intensity;
     }
     // spot light
-    for (const auto& light : input.spotLights) {
+    for (const auto& light : *(input.spotLights)) {
         // 计算光线方向
         Eigen::Vector3f lightDir = (position - light.second.position).head<3>().normalized();
         // 计算光线与聚光灯的角度
@@ -111,13 +111,13 @@ void lsr3d::triangleFragmentShader::shading(const fragmentInputData& input, frag
         lightingColor += lsr3d::CalDirectLight(n0.normal, lightDir, light.second.color) * light.second.intensity;
     }
     // point light
-    for (const auto& light : input.pointLights) {
+    for (const auto& light : *(input.pointLights)) {
         lightingColor += lsr3d::CalDirectLight(n0.normal, (position - light.second.position).head<3>().normalized(), light.second.color) * light.second.intensity;
     }
     if (material.isValid()) {
         // 使用材质进行环境光照
-        if (const auto& image = input.images.find(material.imageHandle);
-            image != input.images.end()) {
+        if (const auto& image = input.images->find(material.imageHandle);
+            image != input.images->end()) {
                 // 使用纹理进行环境光照
                 materialColor = image->second.SampleNearest(uv0.uv)/255.0f;
         }

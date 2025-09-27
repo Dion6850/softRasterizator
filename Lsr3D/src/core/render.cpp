@@ -30,6 +30,13 @@ namespace lsr3d
         // render a single model
         int width, height;
         m_rasterizer.getViewportSize(width, height);
+        uniformData uniform{
+            .viewPos = camera.position,
+            .dirLights = &m_directionalLights,
+            .spotLights = &m_spotLights,
+            .pointLights = &m_pointLights,
+        };
+
         for (const auto& triangle : model.getTriangles()) {
             lsr3d::TriangleData triangleData = triangle.second.toRawData(model.getTriangles(),
                                                                     model.getVertices(),
@@ -41,7 +48,8 @@ namespace lsr3d
                 .M = model.getModelMatrix(),
                 .VP = camera.getVPMatrix(),
                 .width = width,
-                .height = height
+                .height = height,
+                .uniform = &uniform,
             };
             // vertex shader
             lsr3d::vertexOutputData vertOutputData;

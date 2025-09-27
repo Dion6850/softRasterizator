@@ -10,7 +10,7 @@ Eigen::Matrix4f MVP::cal_view_matrix(const Eigen::Vector3f& eye,
     Eigen::Matrix4f view;
     view << s.x(), s.y(), s.z(), -s.dot(eye),
         u.x(), u.y(), u.z(), -u.dot(eye),
-        -f.x(), -f.y(), -f.z(), f.dot(eye),
+        -f.x(), -f.y(), -f.z(), -f.dot(eye),
         0, 0, 0, 1;
     return view;
 }

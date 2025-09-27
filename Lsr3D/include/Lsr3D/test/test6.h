@@ -18,11 +18,12 @@
 using namespace lsr3d;
 using render = lsr3d::Renderer;
 void task() {
+    render::instance.clearDepthBuffer(); // 每帧清空深度缓冲区
     int width, height;
     render::instance.getViewportSize(width, height);
     float scale = 1.0f;
     Camera m_camera(
-        Eigen::Vector3f(2.0f * scale, 2.0f * scale, 4.0f * scale), // 相机位置
+        Eigen::Vector3f(0.0f , 0.0, -3.0f), // 相机位置
         Eigen::Vector3f(0.0f, 0.0f, 0.0f), // 目标点
         Eigen::Vector3f(0.0f, 1.0f, 0.0f), // 上方向
         90.0f,                            // 视场角
@@ -36,35 +37,43 @@ void task() {
 void Init(int width, int height) {
 
     render::instance.initialize();
-    // ModelLoaderHandle modelHandle = render::instance.addModel("assets/model/cube/cube.obj");
-    ModelLoaderHandle modelHandle = render::instance.addModel("assets/model/bunny/bunny.obj");
+    ModelLoaderHandle modelHandle = render::instance.addModel("assets/model/cube/cube.obj");
+    // ModelLoaderHandle modelHandle = render::instance.addModel("assets/model/bunny/bunny.obj");
     ModelLoader& modelLoader = render::instance.getModel(modelHandle);
     render::instance.getModel(modelHandle).setModelMatrix(
         utils::MVP::cal_model_matrix(
             Eigen::Vector3f(0.0f, 0.0f, 0.0f), // 平移
             Eigen::Vector3f(0.0f, 0.0f, 0.0f), // 旋转
-            Eigen::Vector3f(2.0f, 2.0f, 2.0f)  // 缩放
+            Eigen::Vector3f(1.0f, 1.0f, 1.0f)  // 缩放
         )
     );
 
     // create test directional light
 
     // create test spot light
-    SpotLightHandle spotLightHandle = render::instance.createSpotLight(
-        SpotLight(
-            Eigen::Vector4f(0.0f, 0.0f, -1.0f, 1.0f), // 光源位置
-            Eigen::Vector4f(0.0f, 0.0f, 1.0f, 0.0f), // 光源方向
-            Eigen::Vector4f(1.0f, 0.0f, 0.0f, 1.0f), // 光源颜色
-            15.0f, // 聚光灯角度
-            0.5f   // 光源强度
-        )
-    );
+    // SpotLightHandle spotLightHandle = render::instance.createSpotLight(
+    //     SpotLight(
+    //         Eigen::Vector4f(0.0f, 0.0f, -1.0f, 1.0f), // 光源位置
+    //         Eigen::Vector4f(0.0f, 0.0f, 1.0f, 0.0f), // 光源方向
+    //         Eigen::Vector4f(1.0f, 0.0f, 0.0f, 1.0f), // 光源颜色
+    //         15.0f, // 聚光灯角度
+    //         0.5f   // 光源强度
+    //     )
+    // );
     // create test point light
-    PointLightHandle pointLightHandle = render::instance.createPointLight(
-        PointLight(
-            Eigen::Vector4f(0.0f, 0.0f, -1.0f, 1.0f), // 光源位置
-            Eigen::Vector4f(1.0f, 1.0f, 1.0f, 1.0f), // 光源颜色
-            0.2f // 光源强度
+    // PointLightHandle pointLightHandle = render::instance.createPointLight(
+    //     PointLight(
+    //         lsr3d::PVec(2.0f, 1.0f, 4.0f), // 光源位置
+    //         lsr3d::Color(1.0f, 1.0f, 1.0f, 1.0f), // 光源颜色
+    //         1.8f // 光源强度
+    //     )
+    // );
+    // create test directional light
+    DirectionalLightHandle dirLightHandle = render::instance.createDirectionalLight(
+        DirectionalLight(
+            Eigen::Vector3f(-1.0f, -1.0f, -1.0f), // 光源方向
+            lsr3d::Color(1.0f, 1.0f, 1.0f, 1.0f), // 光源颜色
+            1.0f * 3.14f // 光源强度
         )
     );
 

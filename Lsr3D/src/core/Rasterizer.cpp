@@ -40,10 +40,6 @@ namespace lsr3d {
         if(isEnableBackFaceCulling && area >= 0) {
             return; // Backface culling: skip this triangle
         }
-        // cal normal
-        Eigen::Vector3f edge1 = (input.triangle.v1.position - input.triangle.v0.position).head<3>();
-        Eigen::Vector3f edge2 = (input.triangle.v2.position - input.triangle.v0.position).head<3>();
-        lsr3d::NVec n = edge1.cross(edge2).normalized();
         // Rasterize the triangle within the bounding box
         // #pragma omp parallel for schedule(dynamic, 16)
         for (int y = miny; y <= maxy; ++y) {
@@ -65,16 +61,14 @@ namespace lsr3d {
                 }
             }
             lsr3d::fragmentInputData fragmentInput{
-                .position = interpolate(w0, w1, w2, input.triangle.v0, input.triangle.v1, input.triangle.v2),
+                .position = interpolate(w0, w1, w2, input.triangle.v0.xyz(), input.triangle.v1.xyz(), input.triangle.v2.xyz()),
                 .screenSpacePosition = p,
                 .textureCoord = interpolate(w0, w1, w2, input.triangle.t0, input.triangle.t1, input.triangle.t2),
-                .normal = n,
+                .normal = interpolate(w0, w1, w2, input.triangle.v0.normal, input.triangle.v1.normal, input.triangle.v2.normal).normalized(),
                 .color = interpolate(w0, w1, w2, input.triangle.c0,input.triangle.c1,input.triangle.c2),
                 .material = input.triangle.material,
                 .images = &images,
-                .dirLights = &dirLights,
-                .spotLights = &spotLights,
-                .pointLights = &pointLights,
+                .uniform = input.uniform,
             };
             lsr3d::fragementOutputData fragmentOutput;
             fragmentShader.shading(fragmentInput, fragmentOutput);

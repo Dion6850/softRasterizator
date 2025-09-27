@@ -36,6 +36,14 @@ void initializeOpenGL(int argc = 0, char** argv = nullptr);
 void ResizeWindow(int width, int height);
 void calculateFrameTime();
 void displayFrameTime();
+void saveFrameBuffer() {
+    defaultBuffer.saveToFile("output.ppm", FrameBuffer::SaveFormat::SAVE_FORMAT_PPM);
+    std::cout << "Frame buffer saved to output.ppm" << std::endl;
+}
+void exitProgram() {
+    render::instance.shutdown();
+    exit(0);
+}
 /**
  * @brief init draw such as model load
  * @note defined from test.h
@@ -52,7 +60,6 @@ void task();
  */
 inline void Display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    render::instance.clearDepthBuffer(); // 每帧清空深度缓冲区
     /*
     ################## just can draw points ##################
     */
@@ -118,6 +125,15 @@ void idleCallback() {
 }
 
 int main(int argc, char** argv) {
+    // 初始化计时器
+    lastTime = glutGet(GLUT_ELAPSED_TIME);
+    if (argc > 1) {
+        Init(initialWidth, initialHeight);
+        task();
+        calculateFrameTime();
+        saveFrameBuffer();
+        exitProgram();
+    }
     // 初始化OpenGL
     initializeOpenGL(argc, argv);
     glutReshapeFunc(ResizeWindow);
@@ -126,16 +142,12 @@ int main(int argc, char** argv) {
     glutKeyboardFunc([](unsigned char key, int x, int y) {
         // 按下ESC键退出
         if (key == 27 || key == 'q' || key == 'Q') { 
-            render::instance.shutdown();
-            exit(0);
+            exitProgram();
         }
         else if(key == 's' || key == 'S') {
-            defaultBuffer.saveToFile("output.ppm", FrameBuffer::SaveFormat::SAVE_FORMAT_PPM);
-            std::cout << "Frame buffer saved to output.ppm" << std::endl;
+            saveFrameBuffer();
         }
     });
-    // 初始化计时器
-    lastTime = glutGet(GLUT_ELAPSED_TIME);
     
     glutMainLoop();
     return 0;

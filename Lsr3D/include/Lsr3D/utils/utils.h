@@ -34,6 +34,19 @@ namespace lsr3d
 
     int cross(Eigen::Vector2i a, Eigen::Vector2i b);
     float cross2F(Eigen::Vector2f a, Eigen::Vector2f b);
+    template<typename T>
+    T mix(const T& a, const T& b, float factor) {
+        return a * (1.0f - factor) + b * factor;
+    }
+    template<typename T>
+    Eigen::Vector3f mix(const Eigen::Vector3f a, const Eigen::Vector3f b, float factor) {
+        return a * (1.0f - factor) + b * factor;
+    }
+    template<typename T>
+    T pow5(const T& x) {
+        T x2 = x * x;
+        return x2 * x2 * x;
+    }
 }
 namespace utils
 {

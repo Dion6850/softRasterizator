@@ -162,6 +162,7 @@ namespace lsr3d
         int currentVertexIndex = 0; ///< Current vertex index for generating handles
         int currentTextureIndex = 0; ///< Current texture coordinate index for generating handles
         int currentNormalIndex = 0; ///< Current normal index for generating handles
+        int currentFaceNormalIndex = 0; ///< Current face normal index for generating handles
         int currentTriangleIndex = 0; ///< Current triangle index for generating handles
         int currentImageIndex = 0; ///< Current image index for generating handles
         int currentColorIndex = 0; ///< Current color index for generating handles
@@ -264,6 +265,12 @@ namespace lsr3d
          * the material pointers in triangles based on their material names
          */
         void updateTriangleMaterialPointers();
+
+        /**
+         * @brief Generate normals for vertices which without normals
+         * 
+         */
+        void GenNormal();
     };
 
 }// namespace lsr3d

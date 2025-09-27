@@ -46,6 +46,7 @@ bool ModelLoader::loadModel(const std::string& filename) {
     
     // Update material pointers in triangles after all materials are loaded
     updateTriangleMaterialPointers();
+    GenNormal();
     
     return !vertices.empty() && !triangles.empty();
 }
@@ -147,7 +148,7 @@ bool ModelLoader::parseFace(const std::vector<std::string>& tokens) {
     
     // Parse each vertex specification
     for (size_t i = 1; i < tokens.size(); ++i) {
-        int vIdx = 0, tIdx = 0, nIdx = 0;
+        int vIdx = 0, tIdx = 0, nIdx = -1;
         if (!parseFaceVertex(tokens[i], vIdx, tIdx, nIdx)) {
             return false;
         }
@@ -202,14 +203,15 @@ bool ModelLoader::parseFace(const std::vector<std::string>& tokens) {
             int n1 = normalIndices[i] - 1;
             int n2 = normalIndices[i + 1] - 1;
             
-            // if (n0 >= 0 && n0 < static_cast<int>(normals.size()) &&
-            //     n1 >= 0 && n1 < static_cast<int>(normals.size()) &&
-            //     n2 >= 0 && n2 < static_cast<int>(normals.size())) {
-                triangle.n0 = lsr3d::NormalHandle(n0);
-                triangle.n1 = lsr3d::NormalHandle(n1);
-                triangle.n2 = lsr3d::NormalHandle(n2);
-            //     triangle.hasNormals = true;
-            // }
+            if(n0!=-1&& n1!=-1 && n2!=-1){
+                // TODO: Do not solve the input normal
+                triangle.hasNormals = false;
+                // triangle.v0.normal = lsr3d::NormalHandle(n0);
+                // triangle.v1.normal = lsr3d::NormalHandle(n1);
+                // triangle.v2.normal = lsr3d::NormalHandle(n2);
+            } else {
+                triangle.hasNormals = false;
+            }
         }
         
         // Set the current material name for this triangle
@@ -264,8 +266,7 @@ std::vector<std::string> ModelLoader::tokenize(const std::string& str) const {
 
 bool ModelLoader::parseFaceVertex(const std::string& vertexSpec, int& vertexIndex, 
                                  int& textureIndex, int& normalIndex) const {
-    vertexIndex = textureIndex = normalIndex = 0;
-    
+
     // Split by '/' character
     std::vector<std::string> parts;
     std::string current;
@@ -297,9 +298,12 @@ bool ModelLoader::parseFaceVertex(const std::string& vertexSpec, int& vertexInde
             textureIndex = std::stoi(parts[1]);
         }
         
-        // Parse normal index (optional)
+        // Parse normal index 
         if (parts.size() > 2 && !parts[2].empty()) {
             normalIndex = std::stoi(parts[2]);
+        }
+        else {
+            normalIndex = -1; // Indicate no normal index provided
         }
         
         return true;
@@ -382,7 +386,6 @@ bool ModelLoader::loadMaterialFile(const std::string& filename, const std::strin
         materials[handle] = currentMaterial;
         materialNameToHandle[currentMaterial.name] = handle;
     }
-    
     file.close();
     return true;
 }
@@ -507,5 +510,30 @@ void ModelLoader::updateTriangleMaterialPointers() {
             // No material assigned
             triangle.material = MaterialHandle();
         }
+    }
+}
+/**
+ * @warning There is a single face normal here.
+ */
+void ModelLoader::GenNormal() {
+    for (auto& tri : triangles) {
+        if (!tri.second.hasNormals) {
+            lsr3d::PVec v0 = vertices[tri.second.v0].position;
+            lsr3d::PVec v1 = vertices[tri.second.v1].position;
+            lsr3d::PVec v2 = vertices[tri.second.v2].position;
+            lsr3d::Normal normal = ((v1 - v0).cross(v2 - v0)).normalized();
+            float area = fabs(((v1 - v0).cross(v2 - v0)).norm() * 0.5f);
+            int nIdx = currentFaceNormalIndex++;
+            normals.emplace(lsr3d::NormalHandle(nIdx), normal);
+            tri.second.n = lsr3d::NormalHandle(nIdx);
+            // cal vertex normal
+            vertices[tri.second.v0].normal = vertices[tri.second.v0].normal + normal * area;
+            vertices[tri.second.v1].normal = vertices[tri.second.v1].normal + normal * area;
+            vertices[tri.second.v2].normal = vertices[tri.second.v2].normal + normal * area;
+            tri.second.hasNormals = true;
+        }
+    }
+    for (auto& v : vertices) {
+        v.second.normal = v.second.normal.normalized();
     }
 }

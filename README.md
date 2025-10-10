@@ -2,6 +2,10 @@
 This project uses simple functions of FreeGLUT to draw a single point on the canvas, while performing other calculations on the CPU. It is aimed at learning how to create a software rasterizer.
 
 [project repo](https://git.zhywyt.me/Rendering/softResterizator.git)
+
+## Features
+- Software rasterization pipeline
+- **ThreadPool**: High-performance thread pool for parallel task execution (see [docs/ThreadPool.md](docs/ThreadPool.md))
 ## Quick Start
 ```cmd
 vcpkg install freeglut

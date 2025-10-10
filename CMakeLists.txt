@@ -11,8 +11,9 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES} main.cpp)
 
 # test
 add_executable(test_load_image ${SOURCE_FILES} test/load_image.cpp)
+add_executable(test_threadpool src/utils/ThreadPool.cpp test/test_threadpool.cpp)
 
-find_package(GLUT REQUIRED)
+find_package(GLUT)
 if(GLUT_FOUND)
     include_directories(${GLUT_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} ${GLUT_LIBRARIES})
@@ -20,8 +21,12 @@ if(GLUT_FOUND)
     message("GLUT include found at: ${GLUT_INCLUDE_DIR}")
     message("GLUT library found at: ${GLUT_LIBRARIES}")
 else(GLUT_FOUND)
-    message(FATAL_ERROR "GLUT library not found")
+    message(WARNING "GLUT library not found - main executable and test_load_image will not be built")
 endif(GLUT_FOUND)
+
+# Link pthread for test_threadpool
+find_package(Threads REQUIRED)
+target_link_libraries(test_threadpool Threads::Threads)
 if(MSVC)
     add_compile_options(/utf-8)
     # This tells MSVC to interpret source files as UTF-8
